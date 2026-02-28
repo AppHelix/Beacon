@@ -1,0 +1,54 @@
+# Requirements for Beacon: Engagement Discovery Portal
+
+# Web Framework
+nextjs==14.0.0
+react==18.0.0
+typescript==5.0.0
+
+# UI Framework
+tailwindcss==3.0.0
+shadcn-ui==1.0.0
+
+# Backend API
+trpc==10.0.0
+
+# Database
+psycopg2==2.9.3
+pgvector==0.1.0
+
+# ORM
+drizzle-orm==1.0.0
+
+# Authentication
+next-auth==4.0.0
+
+# AI/LLM
+anthropic==1.0.0
+openai==0.27.0
+
+# Email Service
+azure-communication-services==1.0.0
+sendgrid==6.9.7
+
+# Search Engine
+meilisearch==0.30.0
+
+# File Storage
+azure-storage-blob==12.14.1
+
+# Hosting
+azure-appservice==1.0.0
+
+# CI/CD
+github-actions==1.0.0
+
+# Testing
+playwright==1.30.0
+vitest==0.30.0
+
+# Accessibility Testing
+axe-playwright==1.0.0
+
+# Additional Utilities
+prettier==2.8.0
+eslint==8.0.0
