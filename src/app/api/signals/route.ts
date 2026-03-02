@@ -1,6 +1,6 @@
 // src/app/api/signals/route.ts
 import { NextResponse } from 'next/server';
-import { Signal } from '@/src/db/signal';
+import { Signal } from '../../../db/signal';
 
 // In-memory store for demonstration (replace with DB integration)
 let signals: Signal[] = [];
