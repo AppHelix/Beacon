@@ -1,6 +1,6 @@
 // src/features/SignalLifecycle.tsx
 "use client";
-import React, { useState } from 'react';
+import React from 'react';
 import { Signal } from '../db/signal';
 
 interface SignalLifecycleProps {
