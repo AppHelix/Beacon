@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { engagements } from "../../../db/schema";
 
 export async function GET() {
   // Mock data for engagements

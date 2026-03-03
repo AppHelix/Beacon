@@ -4,7 +4,6 @@ import PeopleDirectory from "../features/PeopleDirectory";
 import TeamManagement from "../features/TeamManagement";
 import NotificationSystem from "../features/NotificationSystem";
 import RBAC from "../features/RBAC";
-import E2ETestSuite from "../features/E2ETestSuite";
 import SignalDetail from "../features/SignalDetail";
 import HandRaise from "../features/HandRaise";
 import SignalLifecycle from "../features/SignalLifecycle";
