@@ -6,6 +6,7 @@ const people = [
   { name: "Alice", skills: ["React", "TypeScript"] },
   { name: "Bob", skills: ["Node.js", "PostgreSQL"] },
   { name: "Carol", skills: ["Tailwind", "UI Design"] },
+   { name: "Carie", skills: ["React", "UI Design"] }
 ];
 
 export default function PeopleDirectory() {

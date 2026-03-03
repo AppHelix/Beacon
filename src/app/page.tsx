@@ -36,7 +36,7 @@ export default function Home() {
       <TeamManagement />
       <NotificationSystem />
       <RBAC />
-      <E2ETestSuite />
+      {/* <E2ETestSuite /> */}
     </div>
   );
 }
