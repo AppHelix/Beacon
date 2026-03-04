@@ -4,7 +4,7 @@ import { signals } from '../../../../db/schema';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/auth';
 
-export async function GET(_request: Request, { _params }: { _params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -12,7 +12,7 @@ export async function GET(_request: Request, { _params }: { _params: { id: strin
 
   try {
     const all = await db.select().from(signals);
-    const signal = all.filter(s => s.id === parseInt(_params.id));
+    const signal = all.filter(s => s.id === parseInt(params.id));
 
     if (!signal || signal.length === 0) {
       return NextResponse.json({ error: 'Signal not found' }, { status: 404 });
