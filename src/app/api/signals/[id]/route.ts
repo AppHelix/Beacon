@@ -4,7 +4,7 @@ import { signals } from '../../../../db/schema';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/auth';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -32,7 +32,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 
   try {
-    const { id } = params;
     const body = await request.json();
     const { title, description, status, urgency, requiredSkills } = body;
 
@@ -66,7 +65,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   }
 
   try {
-    const { id } = params;
     const deleted = await db.delete(signals).returning();
 
     if (!deleted || deleted.length === 0) {

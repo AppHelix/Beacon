@@ -17,15 +17,13 @@ export const authOptions: NextAuthOptions = {
     signIn: "/api/auth/signin",
   },
   callbacks: {
-    async jwt(params: { token: any; user?: any }) {
-      const { token, user } = params;
+    async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id;
       }
       return token;
     },
-    async session(params: { session: any; token: any }) {
-      const { session, token } = params;
+    async session({ session, token }: any) {
       if (session.user) {
         session.user.id = token.id as string;
       }
