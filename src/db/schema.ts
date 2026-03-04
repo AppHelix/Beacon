@@ -1,4 +1,4 @@
-import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, integer } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -14,6 +14,19 @@ export const engagements = pgTable('engagements', {
   status: varchar('status', { length: 50 }).notNull(),
   description: text('description'),
   techTags: text('tech_tags'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const signals = pgTable('signals', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  engagementId: integer('engagement_id').notNull(),
+  createdBy: varchar('created_by', { length: 255 }).notNull(),
+  status: varchar('status', { length: 50 }).notNull().default('open'),
+  urgency: varchar('urgency', { length: 50 }).notNull().default('medium'),
+  requiredSkills: text('required_skills'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });

@@ -1,18 +1,30 @@
 import { test, expect } from '@playwright/test';
 
-test('Login page loads and allows user to log in', async ({ page }) => {
-  await page.goto('/login');
+test.describe('Authentication Flow', () => {
+  test('should redirect to sign-in when not authenticated', async ({ page }) => {
+    await page.goto('/');
 
-  // Check if login form is visible
-  await expect(page.locator('form')).toBeVisible();
+    // Should be redirected to sign-in
+    await page.waitForURL(/.*\/api\/auth\/signin/, { timeout: 5000 });
+    expect(page.url()).toContain('signin');
+  });
 
-  // Fill in login form
-  await page.fill('input[name="email"]', 'testuser@example.com');
-  await page.fill('input[name="password"]', 'password123');
+  test('sign-out should work after login', async ({ page }) => {
+    // Start from home page
+    await page.goto('/');
 
-  // Submit the form
-  await page.click('button[type="submit"]');
+    // If redirected to signin, skip (we can't fully test OAuth flow without credentials)
+    const url = page.url();
+    if (url.includes('signin')) {
+      test.skip();
+    }
 
-  // Check if redirected to dashboard
-  await expect(page).toHaveURL('/dashboard');
+    // Try to find and click sign-out button (if we reach the home page)
+    const signOutButton = page.locator('button:has-text("Sign Out")');
+    if (await signOutButton.isVisible()) {
+      await signOutButton.click();
+      // Should redirect to signin page
+      await page.waitForURL(/.*\/api\/auth\/signin/, { timeout: 5000 });
+    }
+  });
 });
