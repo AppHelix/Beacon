@@ -12,20 +12,20 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 
   try {
     const all = await db.select().from(signals);
-    const signal = all.filter(s => s.id === parseInt(params.id));
+    const signal = all.find(s => s.id === parseInt(params.id));
 
-    if (!signal || signal.length === 0) {
+    if (!signal) {
       return NextResponse.json({ error: 'Signal not found' }, { status: 404 });
     }
 
-    return NextResponse.json(signal[0]);
+    return NextResponse.json(signal);
   } catch (error) {
     console.error('Error fetching signal:', error);
     return NextResponse.json({ error: 'Failed to fetch signal' }, { status: 500 });
   }
 }
 
-export async function PATCH(request: Request, { _params }: { _params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -58,19 +58,13 @@ export async function PATCH(request: Request, { _params }: { _params: { id: stri
   }
 }
 
-export async function DELETE(_request: Request, { _params }: { _params: { id: string } }) {
+export async function DELETE(_request: Request): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const deleted = await db.delete(signals).returning();
-
-    if (!deleted || deleted.length === 0) {
-      return NextResponse.json({ error: 'Signal not found' }, { status: 404 });
-    }
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting signal:', error);
