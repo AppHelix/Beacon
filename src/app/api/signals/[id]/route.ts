@@ -11,9 +11,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 
   try {
-    const { id } = params;
     const all = await db.select().from(signals);
-    const signal = all.filter(s => s.id === parseInt(id));
+    const signal = all.filter(s => s.id === parseInt(params.id));
 
     if (!signal || signal.length === 0) {
       return NextResponse.json({ error: 'Signal not found' }, { status: 404 });

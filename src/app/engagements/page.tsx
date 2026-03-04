@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
-import Link from "next/link";
 
 interface Engagement {
   id: number;

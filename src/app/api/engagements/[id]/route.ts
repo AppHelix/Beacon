@@ -11,9 +11,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 
   try {
-    const { id } = params;
     const all = await db.select().from(engagements);
-    const engagement = all.filter(e => e.id === parseInt(id));
+    const engagement = all.filter(e => e.id === parseInt(params.id));
 
     if (!engagement || engagement.length === 0) {
       return NextResponse.json({ error: "Engagement not found" }, { status: 404 });
@@ -33,7 +32,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   try {
-    const { id } = params;
     const body = await request.json();
     const { name, clientName, status, description, techTags } = body;
 
@@ -67,7 +65,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   }
 
   try {
-    const { id } = params;
     const deleted = await db.delete(engagements).returning();
 
     if (!deleted || deleted.length === 0) {
