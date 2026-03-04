@@ -4,7 +4,11 @@ import { signals } from '../../../../db/schema';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/auth';
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _request: Request,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -25,7 +29,11 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   }
 }
 
-export async function PATCH(request: Request, _context: any): Promise<NextResponse> {
+export async function PATCH(
+  request: Request,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  _context: any
+): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -58,7 +66,10 @@ export async function PATCH(request: Request, _context: any): Promise<NextRespon
   }
 }
 
-export async function DELETE(_request: Request): Promise<NextResponse> {
+export async function DELETE(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _request: Request
+): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
