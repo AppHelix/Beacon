@@ -57,6 +57,9 @@ These locks apply to AI behavior (not human maintainers):
 - Never move to the next planned item without an intermittent scan.
 - Never treat mocked tests alone as implementation proof for server/data logic.
 - Never update status docs with optimistic wording (use verified status only).
+- Always use shadcn/ui components first for UI primitives (button, input, select, dropdown, dialog, tooltip, menu, table, etc.) before writing custom UI.
+- Keep handwritten CSS and custom primitive components minimal; customize via shadcn props, variants, and theme tokens.
+- All user-facing navigation must be route-driven and shareable by URL (no critical view state hidden only in local component state).
 
 ---
 
@@ -111,6 +114,33 @@ Implement in small slices where each slice includes:
 - documentation delta.
 
 Do not perform large unverified bulk edits.
+
+## Step 3A: UI Component Selection (Required)
+
+Before creating or editing UI:
+- Check shadcn registry/components and use existing components where applicable.
+- Prefer composition of shadcn components over handwritten HTML/CSS wrappers.
+- Only create custom UI primitives when no shadcn component fits the requirement.
+
+When custom UI is unavoidable:
+- Reuse shadcn tokens (`bg-background`, `text-foreground`, `border-border`, etc.).
+- Keep custom styling scoped and minimal.
+
+## Step 3B: Routing and URL-State Contract (Required)
+
+For every navigation and data view, enforce URL-based state:
+- Navigation targets must always resolve to stable routes.
+- Filters must sync to query params.
+- Sorting must sync to query params.
+- Search input must sync to query params.
+- Pagination page/size must sync to query params.
+- Tab selection (when content meaningfully changes) must sync to query params.
+
+Rules:
+- Users must be able to copy/paste URL and restore the same visible state.
+- Browser back/forward must preserve expected UI context.
+- Do not use local-only state for shareable view controls.
+- Route param/query parsing must include defaults and invalid-value fallbacks.
 
 ## Step 4: Intermittent Scan Gate (Required)
 
@@ -169,10 +199,13 @@ Before merge:
 Use this checklist during intermittent scans:
 
 - [ ] Planned item still in scope and phase-correct.
+- [ ] shadcn/ui components used where applicable (no unnecessary handcrafted primitives).
 - [ ] All modified endpoints perform real targeted DB actions.
 - [ ] Update/Delete operations use correct identifier constraints.
 - [ ] Auth/session checks preserved at API boundaries.
 - [ ] Input validation for required fields is present.
+- [ ] Navigation routes are valid and reachable from UI entry points.
+- [ ] Filters/sorting/search/pagination/tab state are URL-synced when shareability is expected.
 - [ ] UI state reflects true backend behavior (no false success states).
 - [ ] Tests validate implementation logic, not only mocked fetch success.
 - [ ] `docs/PROGRESS.md` reflects current verified state.
@@ -185,6 +218,8 @@ Use this checklist during intermittent scans:
 A task is complete only if all are true:
 
 - Functional behavior works for acceptance criteria.
+- shadcn-first component usage is followed for affected UI scope.
+- Route + query URL behavior is verified for affected navigation and list/detail views.
 - Failure paths are handled (4xx/5xx, empty states, unauthorized).
 - Tests cover core success and failure paths.
 - Docs updated for any scope/design/status changes.
