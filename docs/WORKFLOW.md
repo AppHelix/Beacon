@@ -4,6 +4,12 @@ This document describes how different users (personas) use the Beacon Engagement
 
 ---
 
+## AI Policy Reference
+
+AI execution governance is maintained in `docs/AI-GUIDELINE.md` as the single source of truth.
+
+---
+
 ## 1. Personas Overview
 
 - **Explorer** (engineer on bench/partial allocation): wants to discover relevant engagements and volunteer to help.

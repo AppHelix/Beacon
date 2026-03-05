@@ -31,12 +31,14 @@ jobs:
       - name: Run Lint
         run: npm run lint
 
+      - name: Run Type Check
+        run: npm run typecheck
+
       - name: Build Next.js app
         run: npm run build
 
       - name: Run Unit/Integration Tests (Vitest)
         run: npm test -- --run
-        continue-on-error: true
 
   e2e-tests:
     runs-on: ubuntu-latest
