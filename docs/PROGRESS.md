@@ -9,7 +9,7 @@
 
 - [x] Initialize Next.js 14+ app (App Router) with TypeScript.
 - [x] Configure Tailwind CSS, shadcn/ui, ESLint, and Prettier.
-- [-] Set up base folder structure (`app`, `features`, `lib`, `db`, `components`).
+- [x] Set up base folder structure (`app`, `features`, `lib`, `db`, `components`).
 - [x] Add environment variable template and local setup instructions.
 - [x] Define baseline CI workflow skeleton (lint/test/build jobs scaffolded).
 - [x] Week 1 exit check: repository boots locally with lint passing.
