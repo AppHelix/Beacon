@@ -230,6 +230,61 @@ This document describes text-based wireframes for the Beacon Engagement Discover
 
 ---
 
+## 13. Strict UI Guidance (Mandatory for Implementation)
+
+This section is enforceable. Any screen that violates these rules is considered incomplete.
+
+### 13.1 Visual Hierarchy and Structure
+- Every page must include, in this order: page title, one-line context, primary action, filters/search (if applicable), content area.
+- Primary action must be visually dominant and placed above the fold.
+- Secondary actions must never visually overpower the primary action.
+- Card-based layouts must align on a consistent grid with consistent spacing and action placement.
+
+### 13.2 Navigation and Orientation
+- Global navigation must remain fixed and predictable across all authenticated pages.
+- Active nav state must always be visible.
+- Every detail page must include a clear back path to its parent.
+- Users must be able to reach core areas (Home, Engagements, Signals, People, Admin) in one click.
+
+### 13.3 Empty, Loading, Success, and Error States
+- Empty states must include an explanation and a direct next action (no dead-end text).
+- Loading states must be visible for all data-bound sections.
+- Success feedback must confirm completion and suggest the next step.
+- Error states must explain what failed and how users can recover.
+
+### 13.4 Professional Enterprise Styling Baseline
+- Use a consistent design language for colors, typography scale, spacing, borders, and shadows.
+- Use semantic status styles consistently for Open, In Progress, Resolved, Closed and urgency levels.
+- Maintain visual consistency between list cards, detail cards, and form controls.
+- Avoid ad-hoc page-specific styling that breaks system consistency.
+
+### 13.5 Forms and Interaction Quality
+- All forms must include labels, helper text where needed, and validation guidance.
+- Required fields must be clearly marked and validated before submission.
+- Button states must include default, hover, active, disabled, and loading.
+- Keyboard navigation and focus visibility must work across all controls.
+
+### 13.6 First-Time User Guidance
+- Home page must explain what the product does in plain language.
+- Include a clear “start here” path for new users.
+- Core pages must provide contextual guidance so users can proceed without support.
+- New users must be able to complete at least one full journey (discover, post, or respond) unaided.
+
+### 13.7 Responsiveness and Accessibility
+- All primary workflows must be usable on desktop, tablet, and mobile breakpoints.
+- Touch targets must remain usable on smaller devices.
+- Contrast, focus states, and semantic labels must satisfy WCAG 2.1 AA baseline.
+
+### 13.8 UX Acceptance Gate (Before Marking a Screen Complete)
+- [ ] Purpose of the page is clear within one glance.
+- [ ] Primary action is obvious within 5 seconds.
+- [ ] Navigation path is clear without external explanation.
+- [ ] Empty/loading/error/success states are implemented.
+- [ ] Styling is consistent with shared design language.
+- [ ] A first-time user can complete the intended action without support.
+
+---
+
 ## General UI/UX Notes
 - **Responsiveness:** All layouts adapt to desktop (1440px+), tablet (768–1439px), and mobile (320–767px). Use a responsive grid system; navigation collapses to a hamburger menu on smaller screens.
 - **Touch targets:** All interactive elements (buttons, icons, cards, filters) should have a minimum 44px tap area on touch devices.
