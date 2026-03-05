@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface Signal {
   id: number;
@@ -29,10 +30,29 @@ const fetchSignals = async (): Promise<Signal[]> => {
 
 export default function SignalBoard() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPath = pathname ?? "/signals";
+  const getParam = (key: string) => searchParams?.get(key) ?? "";
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [statusFilter, setStatusFilter] = useState("");
-  const [urgencyFilter, setUrgencyFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState(getParam("status"));
+  const [urgencyFilter, setUrgencyFilter] = useState(getParam("urgency"));
+  const [search, setSearch] = useState(getParam("q"));
   const [isLoading, setIsLoading] = useState(true);
+
+  const updateQuery = (updates: Record<string, string | undefined>) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    const query = params.toString();
+    router.replace(query ? `${currentPath}?${query}` : currentPath, { scroll: false });
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -40,6 +60,27 @@ export default function SignalBoard() {
       .then(setSignals)
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    setStatusFilter(searchParams?.get("status") ?? "");
+    setUrgencyFilter(searchParams?.get("urgency") ?? "");
+    setSearch(searchParams?.get("q") ?? "");
+  }, [searchParams]);
+
+  const filteredSignals = useMemo(() => {
+    return signals.filter(signal => {
+      const matchesStatus = !statusFilter || signal.status === statusFilter;
+      const matchesUrgency = !urgencyFilter || signal.urgency === urgencyFilter;
+      const matchesSearch =
+        !search ||
+        signal.title.toLowerCase().includes(search.toLowerCase()) ||
+        signal.description.toLowerCase().includes(search.toLowerCase());
+      return matchesStatus && matchesUrgency && matchesSearch;
+    });
+  }, [signals, statusFilter, urgencyFilter, search]);
+
+  const statusOptions = Array.from(new Set(signals.map(s => s.status)));
+  const urgencyOptions = ["low", "medium", "high"];
 
   if (status === "loading") {
     return (
@@ -65,15 +106,6 @@ export default function SignalBoard() {
       </div>
     );
   }
-
-  const filteredSignals = signals.filter(signal => {
-    const matchesStatus = !statusFilter || signal.status === statusFilter;
-    const matchesUrgency = !urgencyFilter || signal.urgency === urgencyFilter;
-    return matchesStatus && matchesUrgency;
-  });
-
-  const statusOptions = Array.from(new Set(signals.map(s => s.status)));
-  const urgencyOptions = ["low", "medium", "high"];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -110,11 +142,23 @@ export default function SignalBoard() {
         <p className="text-gray-600">Track and collaborate on project signals and issues</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <input
+          value={search}
+          onChange={e => {
+            setSearch(e.target.value);
+            updateQuery({ q: e.target.value || undefined });
+          }}
+          placeholder="Search title or description..."
+          className="p-2 border rounded-none"
+        />
         <select
           value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="p-2 border rounded"
+          onChange={e => {
+            setStatusFilter(e.target.value);
+            updateQuery({ status: e.target.value || undefined });
+          }}
+          className="p-2 border rounded-none"
         >
           <option value="">All Status</option>
           {statusOptions.map(status => (
@@ -125,8 +169,11 @@ export default function SignalBoard() {
         </select>
         <select
           value={urgencyFilter}
-          onChange={e => setUrgencyFilter(e.target.value)}
-          className="p-2 border rounded"
+          onChange={e => {
+            setUrgencyFilter(e.target.value);
+            updateQuery({ urgency: e.target.value || undefined });
+          }}
+          className="p-2 border rounded-none"
         >
           <option value="">All Urgency</option>
           {urgencyOptions.map(urgency => (
@@ -137,7 +184,7 @@ export default function SignalBoard() {
         </select>
       </div>
 
-      <div className="bg-white rounded shadow-md">
+      <div className="bg-white rounded-none shadow-md">
         {isLoading && <p className="p-6 text-gray-600">Loading signals...</p>}
 
         {!isLoading && filteredSignals.length === 0 && (
@@ -151,10 +198,10 @@ export default function SignalBoard() {
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-semibold text-gray-800">{signal.title}</h3>
                   <div className="flex gap-2">
-                    <span className={`text-xs px-2 py-1 rounded ${getStatusColor(signal.status)}`}>
+                    <span className={`text-xs px-2 py-1 rounded-none ${getStatusColor(signal.status)}`}>
                       {signal.status.toUpperCase()}
                     </span>
-                    <span className={`text-xs px-2 py-1 rounded ${getUrgencyColor(signal.urgency)}`}>
+                    <span className={`text-xs px-2 py-1 rounded-none ${getUrgencyColor(signal.urgency)}`}>
                       {signal.urgency}
                     </span>
                   </div>

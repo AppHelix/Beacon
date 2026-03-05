@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface User {
   id: number;
@@ -28,10 +29,28 @@ const fetchUsers = async (): Promise<User[]> => {
 
 export default function PeopleDirectory() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPath = pathname ?? "/people";
+  const getParam = (key: string) => searchParams?.get(key) ?? "";
   const [users, setUsers] = useState<User[]>([]);
-  const [searchFilter, setSearchFilter] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+  const [searchFilter, setSearchFilter] = useState(getParam("q"));
+  const [roleFilter, setRoleFilter] = useState(getParam("role"));
   const [isLoading, setIsLoading] = useState(true);
+
+  const updateQuery = (updates: Record<string, string | undefined>) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    const query = params.toString();
+    router.replace(query ? `${currentPath}?${query}` : currentPath, { scroll: false });
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -39,6 +58,24 @@ export default function PeopleDirectory() {
       .then(setUsers)
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    setSearchFilter(searchParams?.get("q") ?? "");
+    setRoleFilter(searchParams?.get("role") ?? "");
+  }, [searchParams]);
+
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch =
+        !searchFilter ||
+        user.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchFilter.toLowerCase());
+      const matchesRole = !roleFilter || user.role === roleFilter;
+      return matchesSearch && matchesRole;
+    });
+  }, [users, searchFilter, roleFilter]);
+
+  const roles = Array.from(new Set(users.map(u => u.role)));
 
   if (status === "loading") {
     return (
@@ -64,17 +101,6 @@ export default function PeopleDirectory() {
       </div>
     );
   }
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch =
-      !searchFilter ||
-      user.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchFilter.toLowerCase());
-    const matchesRole = !roleFilter || user.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
-
-  const roles = Array.from(new Set(users.map(u => u.role)));
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -105,13 +131,19 @@ export default function PeopleDirectory() {
           type="text"
           placeholder="Search by name or email..."
           value={searchFilter}
-          onChange={e => setSearchFilter(e.target.value)}
-          className="p-2 border rounded"
+          onChange={e => {
+            setSearchFilter(e.target.value);
+            updateQuery({ q: e.target.value || undefined });
+          }}
+          className="p-2 border rounded-none"
         />
         <select
           value={roleFilter}
-          onChange={e => setRoleFilter(e.target.value)}
-          className="p-2 border rounded"
+          onChange={e => {
+            setRoleFilter(e.target.value);
+            updateQuery({ role: e.target.value || undefined });
+          }}
+          className="p-2 border rounded-none"
         >
           <option value="">All Roles</option>
           {roles.map(role => (
@@ -131,7 +163,7 @@ export default function PeopleDirectory() {
       {!isLoading && filteredUsers.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredUsers.map(user => (
-            <div key={user.id} className="bg-white rounded shadow-md p-6 hover:shadow-lg">
+            <div key={user.id} className="bg-white rounded-none shadow-md p-6 hover:shadow-lg">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-800">{user.name}</h3>
@@ -139,13 +171,13 @@ export default function PeopleDirectory() {
                 </div>
               </div>
               <div className="mb-4">
-                <span className={`text-xs px-3 py-1 rounded font-semibold ${getRoleBadgeColor(user.role)}`}>
+                <span className={`text-xs px-3 py-1 rounded-none font-semibold ${getRoleBadgeColor(user.role)}`}>
                   {user.role}
                 </span>
               </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+              <Link href={`/people?q=${encodeURIComponent(user.name)}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-none inline-block text-center">
                 View Profile
-              </button>
+              </Link>
             </div>
           ))}
         </div>

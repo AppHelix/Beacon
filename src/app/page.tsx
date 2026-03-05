@@ -124,8 +124,8 @@ export default function Home() {
     return (
       <TooltipProvider>
         <div className="min-h-screen bg-background text-foreground">
-          <div className="mx-auto w-full max-w-[1600px] px-6 py-16 xl:px-12">
-            <Card className="rounded-none shadow-sm">
+          <div className="mx-auto grid w-full max-w-[1600px] gap-8 px-6 py-16 lg:grid-cols-4 xl:px-12">
+            <Card className="rounded-none shadow-sm lg:col-span-3">
               <CardHeader className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Tooltip>
@@ -137,41 +137,41 @@ export default function Home() {
                   <p className="text-sm font-semibold tracking-wide text-primary">AppHelix Internal Platform</p>
                 </div>
                 <CardTitle className="text-4xl font-bold sm:text-5xl">Beacon</CardTitle>
-                <CardDescription className="max-w-3xl text-lg text-muted-foreground">
+                <CardDescription className="max-w-xl text-lg text-muted-foreground">
                   One place to discover engagements, post or resolve Signals, and connect with the right people across teams.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-3">
-                  <Card className="rounded-none bg-muted shadow-none">
-                    <CardContent className="p-4 text-sm">
-                      <p className="font-semibold text-foreground">1. Discover</p>
-                      <p className="mt-1 text-muted-foreground">Search active engagements and current priorities.</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="rounded-none bg-muted shadow-none">
-                    <CardContent className="p-4 text-sm">
-                      <p className="font-semibold text-foreground">2. Collaborate</p>
-                      <p className="mt-1 text-muted-foreground">Raise or respond to Signals with clear ownership.</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="rounded-none bg-muted shadow-none">
-                    <CardContent className="p-4 text-sm">
-                      <p className="font-semibold text-foreground">3. Deliver</p>
-                      <p className="mt-1 text-muted-foreground">Track outcomes and scale proven solutions.</p>
-                    </CardContent>
-                  </Card>
+                <div className="grid gap-3">
+                  <div className="rounded-none border bg-muted p-4 text-sm">
+                    <p className="font-semibold text-foreground">1. Discover</p>
+                    <p className="mt-1 text-muted-foreground">Search active engagements and current priorities.</p>
+                  </div>
+                  <div className="rounded-none border bg-muted p-4 text-sm">
+                    <p className="font-semibold text-foreground">2. Collaborate</p>
+                    <p className="mt-1 text-muted-foreground">Raise or respond to Signals with clear ownership.</p>
+                  </div>
+                  <div className="rounded-none border bg-muted p-4 text-sm">
+                    <p className="font-semibold text-foreground">3. Deliver</p>
+                    <p className="mt-1 text-muted-foreground">Track outcomes and scale proven solutions.</p>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="mt-8">
-                  <Button
-                    onClick={() => signIn("azure-ad")}
-                    className="rounded-none px-8 py-3 text-base font-semibold"
-                  >
-                    Sign In with Azure AD
-                  </Button>
-                  <p className="mt-3 text-sm text-muted-foreground">Internal use only — AppHelix employees and authorized members.</p>
-                </div>
+            <Card className="rounded-none shadow-sm lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-2xl">Sign in to continue</CardTitle>
+                <CardDescription>Use your Azure AD account to access Beacon dashboard features.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  onClick={() => signIn("azure-ad")}
+                  className="w-full rounded-none px-8 py-3 text-base font-semibold"
+                >
+                  Sign In with Azure AD
+                </Button>
+                <p className="text-sm text-muted-foreground">Internal use only — AppHelix employees and authorized members.</p>
               </CardContent>
             </Card>
           </div>
