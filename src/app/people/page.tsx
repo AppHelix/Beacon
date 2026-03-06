@@ -1,6 +1,8 @@
 "use client";
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 export const dynamic = "force-dynamic";
-import React, { useEffect, useMemo, useState } from "react";
+
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -28,7 +30,7 @@ const fetchUsers = async (): Promise<User[]> => {
   }
 };
 
-export default function PeopleDirectory() {
+function ClientPeopleDirectory() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -184,5 +186,13 @@ export default function PeopleDirectory() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PeopleDirectory() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ClientPeopleDirectory />
+    </Suspense>
   );
 }
