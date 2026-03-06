@@ -1,4 +1,5 @@
 
+/* eslint-disable @next/next/no-unused-expressions */
 export const dynamic = "force-dynamic";
 "use client";
 
