@@ -21,7 +21,7 @@
 - [x] Run initial migrations and validate schema in local/dev DB.
 - [x] Integrate Azure AD SSO via NextAuth.js (login/logout/session).
 - [x] Add auth guards for protected routes and API boundaries.
-- [-] Week 2 exit check: authenticated user can sign in and persist session.
+- [x] Week 2 exit check: authenticated user can sign in and persist session.
 
 ## Phase 03 (Week 3) — Engagement MVP + Baseline Quality
 
