@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-unused-expressions */
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 export const dynamic = "force-dynamic";
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
