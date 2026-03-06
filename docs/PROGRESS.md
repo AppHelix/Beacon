@@ -16,9 +16,9 @@
 
 ## Phase 02 (Week 2) — Data + Auth Core
 
-- [-] Provision PostgreSQL and enable required extensions (`pg_trgm`, prep for `pgvector`).
+- [x] Provision PostgreSQL and enable required extensions (`pg_trgm`, prep for `pgvector`).
 - [x] Add Drizzle ORM and create core schema (users, engagements, tech tags).
-- [-] Run initial migrations and validate schema in local/dev DB.
+- [x] Run initial migrations and validate schema in local/dev DB.
 - [x] Integrate Azure AD SSO via NextAuth.js (login/logout/session).
 - [x] Add auth guards for protected routes and API boundaries.
 - [-] Week 2 exit check: authenticated user can sign in and persist session.
@@ -141,7 +141,7 @@ For each Week/Phase (01–12), publish evidence with links:
 
 ## Data & Platform Hardening Milestones
 
-- [-] Week 02: Core schema constraints enforced (`NOT NULL`, PK/FK, required uniques).
+- [x] Week 02: Core schema constraints enforced (`NOT NULL`, PK/FK, required uniques).
 - [ ] Week 03: Baseline query indexes in place and validated.
 - [ ] Week 06: RBAC policy matrix implemented and admin audit events enabled.
 - [ ] Week 07: Vector/AI data model hardened with retention and refresh rules.
