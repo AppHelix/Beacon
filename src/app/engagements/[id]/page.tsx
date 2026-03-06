@@ -116,9 +116,31 @@ export default function EngagementDetail({ params }: { params: { id: string } })
   if (error) return <div className="p-4 md:p-8 text-red-600">{error}</div>;
   if (!engagement) return <div className="p-4 md:p-8">Engagement not found</div>;
 
-  const techTagsArray = engagement.techTags
-    ? JSON.parse(engagement.techTags)
-    : [];
+  let techTagsArray: string[] = [];
+  if (engagement.techTags) {
+    try {
+      if (Array.isArray(engagement.techTags)) {
+        techTagsArray = engagement.techTags;
+      } else if (typeof engagement.techTags === 'string') {
+        // Try JSON.parse first
+        try {
+          const parsed = JSON.parse(engagement.techTags);
+          if (Array.isArray(parsed)) {
+            techTagsArray = parsed;
+          } else if (typeof parsed === 'string') {
+            techTagsArray = parsed.split(',').map(t => t.trim()).filter(Boolean);
+          } else {
+            techTagsArray = [];
+          }
+        } catch {
+          // Not JSON, treat as comma-separated string
+          techTagsArray = engagement.techTags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+      }
+    } catch {
+      techTagsArray = [];
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">

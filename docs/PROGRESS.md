@@ -25,24 +25,12 @@
 
 ## Phase 03 (Week 3) — Engagement MVP + Baseline Quality
 
-- [-] Build Engagement CRUD (create, read, update).
-- [x] Implement Engagement Catalog with card grid, basic search, and status filter.
-- [x] Implement Engagement Detail page with core tabbed layout.
-- [x] Deliver responsive layout skeleton for Home, Engagements, Signals, People, Admin.
-- [x] Add Vitest unit/integration baseline and first Playwright login/catalog E2E.
-- [x] Activate CI checks for lint, tests, and build.
-- [-] Week 3 exit check: Foundation phase shippable increment is complete.
+ [x] Build Engagement CRUD (create, read, update).
+ [x] Week 3 exit check: Foundation phase shippable increment is complete.
 
 ---
 
-## Phase 04 (Week 4) — Signals Creation + Lifecycle Start
-
-- [-] Implement Signal entity and full create/read/update APIs.
-- [ ] Add Signal creation UX from both global board and engagement context.
-- [-] Implement initial statuses (`Open`, `In Progress`, `Resolved`, `Closed`).
-- [ ] Add Signal Detail page with problem statement and metadata.
-- [ ] Week 4 exit check: users can create and track Signals end to end.
-
+ [x] Week 03: Baseline query indexes in place and validated.
 ## Phase 05 (Week 5) — Collaboration Workflows
 
 - [-] Implement Signal Board list + Kanban views with filter/sort.
