@@ -2,6 +2,8 @@
 "use client";
 export const dynamic = "force-dynamic";
 
+import { Suspense } from "react";
+
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -29,7 +31,7 @@ const getErrorMessage = (errorCode: string) => {
   }
 };
 
-export default function AuthErrorPage() {
+function AuthErrorPageContent() {
   const searchParams = useSearchParams();
   const errorCode = searchParams?.get("error") ?? "Unknown";
   const message = getErrorMessage(errorCode);
@@ -57,5 +59,19 @@ export default function AuthErrorPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense
+      fallback={(
+        <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+          <p>Loading...</p>
+        </div>
+      )}
+    >
+      <AuthErrorPageContent />
+    </Suspense>
   );
 }

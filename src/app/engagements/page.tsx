@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -38,7 +38,7 @@ const fetchEngagements = async (): Promise<Engagement[]> => {
   }
 };
 
-export default function EngagementCatalog() {
+function EngagementCatalogContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -264,5 +264,19 @@ export default function EngagementCatalog() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function EngagementCatalog() {
+  return (
+    <Suspense
+      fallback={(
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      )}
+    >
+      <EngagementCatalogContent />
+    </Suspense>
   );
 }

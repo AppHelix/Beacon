@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -29,7 +29,7 @@ const fetchSignals = async (): Promise<Signal[]> => {
   }
 };
 
-export default function SignalBoard() {
+function SignalBoardContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -217,5 +217,19 @@ export default function SignalBoard() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SignalBoard() {
+  return (
+    <Suspense
+      fallback={(
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      )}
+    >
+      <SignalBoardContent />
+    </Suspense>
   );
 }
