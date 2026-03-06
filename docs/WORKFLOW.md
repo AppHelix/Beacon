@@ -1,10 +1,233 @@
 ## Beacon – End User Workflow
 
-This document describes how different users (personas) use the Beacon Engagement Discovery Portal day to day.
+This document is the **mandatory UX workflow contract** for Beacon.
+It defines exactly how navigation, page layout, user guidance, and interaction patterns must work so end users can operate the platform without support dependency.
 
 ---
 
-## 1. Personas Overview
+## AI Policy Reference
+
+AI execution governance is maintained in `docs/AI-GUIDELINE.md` as the single source of truth.
+
+---
+
+## 1. Workflow Goals (Non-Negotiable)
+
+- A first-time user must understand the product purpose within 10 seconds of landing on Home.
+- A user must reach any core area (Engagements, Signals, People, Admin) in one click from primary navigation.
+- Every page must answer: **Where am I? What can I do here? What should I do next?**
+- Critical actions must be obvious and consistent across pages.
+- Empty states must guide users to the next meaningful action.
+- Navigation and interaction behavior must be predictable and repeatable.
+
+---
+
+## 2. Information Architecture
+
+Primary sections:
+1. Home
+2. Engagements
+3. Signals
+4. People
+5. Admin
+
+Global utility actions:
+- Search
+- Notifications
+- Help/Guided Tour
+- Profile menu (account, preferences, sign out)
+
+Rules:
+- No hidden core navigation behind nested menus.
+- Primary nav labels must stay stable (no frequent renaming).
+- Back navigation must always return to the previous logical parent page.
+
+---
+
+## 3. Global Navigation Contract
+
+Header must include:
+- Product identity (`Beacon`)
+- Primary nav tabs (Home, Engagements, Signals, People, Admin)
+- User context (signed-in user)
+- Sign-out action
+
+Left-side rail (optional on desktop, collapsed on smaller screens):
+- Shortcuts to recent engagements/signals
+- Saved filters
+- Quick create actions
+
+Navigation behavior:
+- Active page must be visually highlighted.
+- Hover and focus states must be clear and accessible.
+- Keyboard navigation must support tab order and visible focus ring.
+- Route transitions must preserve context where possible (filters, search terms).
+
+---
+
+## 4. Page Layout Contract (Every Core Page)
+
+Each page must follow this structure in order:
+1. **Page header**: Title + one-line purpose text
+2. **Primary actions row**: Most important action first (e.g., Create, Post Signal)
+3. **Filters/search row**: concise and task-relevant
+4. **Main content region**: cards/table/list/kanban
+5. **Context help**: empty state guidance or inline help
+
+Rules:
+- Do not place critical actions below the fold by default.
+- Keep max 1 primary CTA per region.
+- Avoid mixed visual hierarchy where secondary buttons look primary.
+- Use consistent spacing scale and card alignment across pages.
+
+---
+
+## 5. Visual and Interaction Standards
+
+Professional UI baseline:
+- Consistent color system for background, surface, text, borders, status, and action states.
+- Clear typography hierarchy: page title, section title, body, helper text.
+- Card grid alignment must be consistent in height, spacing, and action placement.
+- Status badges must be semantic and consistent (`Open`, `In Progress`, `Resolved`, `Closed`).
+
+Interaction quality:
+- Every click target must have clear feedback (hover, active, disabled, loading).
+- Long-running actions must show loading states.
+- Error states must be actionable, not generic.
+- Success states must confirm outcome and suggest next action.
+
+---
+
+## 6. First-Time User Guidance (Layman Friendly)
+
+Beacon must provide onboarding without requiring support staff.
+
+Required guidance:
+- Home page “What is Beacon?” section in plain language.
+- “Start here” quick actions for new users.
+- Optional guided walkthrough for first login:
+   1. What each main section does
+   2. How to find work/help requests
+   3. How to contribute or ask for help
+   4. Where to track personal activity
+- Inline helper text on forms for non-obvious fields.
+- Empty states must include direct CTA (not dead-end messages).
+
+---
+
+## 7. Persona-Based Core Journeys
+
+### 7.1 Explorer (Find where to help)
+- Home → Signals or Engagements
+- Apply search/filter
+- Open detail
+- Raise hand / add suggestion
+- Track contribution status
+
+### 7.2 Seeker (Ask for help)
+- Engagement detail or Signals board
+- Post Signal with required context
+- Track responses
+- Move lifecycle state
+- Add resolution summary
+
+### 7.3 Curator (Maintain engagement health)
+- Open engagement profile
+- Update metadata/team/challenges
+- Verify linked signals
+- Keep status/freshness updated
+
+### 7.4 Newcomer (Onboard quickly)
+- Home guidance
+- Browse Engagements + People
+- Save/follow relevant areas
+- Ask Beacon AI for discovery questions
+
+### 7.5 Strategist/Admin (Operate and govern)
+- Review dashboard KPIs
+- Manage access and taxonomy
+- Monitor audit/security/usage signals
+
+---
+
+## 8. Page-Specific UX Rules
+
+## Home
+- Must communicate product value and top actions immediately.
+- Must surface recent activity and key shortcuts.
+
+## Engagements
+- Must support quick scan (name, client, status, key tags).
+- Must provide clear path to details and linked signals.
+
+## Engagement Detail
+- Tabs must be clear and purpose-based (Overview, Signals, Details).
+- Signals area must support quick triage and action.
+
+## Signals
+- Must support list + lifecycle visibility.
+- Filters must prioritize urgency/status/skills.
+- Empty state must encourage creating a signal.
+
+## People
+- Must support find-by-name, role, and skill.
+- User cards must expose enough context to initiate collaboration.
+
+## Admin
+- Must separate governance actions from analytics.
+- Risky actions must include confirmation and audit trail cues.
+
+---
+
+## 9. Content and Copy Standards
+
+- Use plain language; avoid internal jargon where possible.
+- Button labels must be action-oriented (`Create Signal`, `View Details`, `Assign Role`).
+- Helper text must explain why information is needed.
+- Error messages must state what failed and what the user should do next.
+
+---
+
+## 10. Accessibility and Usability Baseline
+
+- Color contrast must satisfy WCAG 2.1 AA.
+- Keyboard-only navigation must be fully usable for core journeys.
+- Focus states must always be visible.
+- Forms must include labels, validation feedback, and accessible errors.
+- Layout must remain usable on standard laptop and mobile widths.
+
+---
+
+## 11. Definition of Workflow Done
+
+A page or journey is workflow-complete only when all are true:
+
+- Navigation path is unambiguous.
+- Primary action is obvious.
+- Empty, loading, success, and error states are implemented.
+- New user can complete the journey without external guidance.
+- Copy is clear for non-technical users.
+- Accessibility baseline is met.
+
+---
+
+## 12. UX Review Checklist (Mandatory Before Marking Complete)
+
+- [ ] Is the page purpose obvious in one glance?
+- [ ] Can user identify next action in under 5 seconds?
+- [ ] Are controls aligned and visually consistent?
+- [ ] Are status colors and labels consistent across pages?
+- [ ] Are empty states actionable?
+- [ ] Is guided onboarding/support text present where needed?
+- [ ] Can a first-time user complete the intended journey unaided?
+
+---
+
+## 13. Governance
+
+- Any implementation that violates this workflow contract must be treated as incomplete.
+- UI implementation must follow this document alongside `FEATURES.md` and `WIREFRAMES.md`.
+- If design intent is unclear, prefer the simplest and clearest user path.
 
 - **Explorer** (engineer on bench/partial allocation): wants to discover relevant engagements and volunteer to help.
 - **Seeker** (team lead/engineer facing a blocker): wants to post a help request and find someone with the right expertise.

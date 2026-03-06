@@ -5,3 +5,8 @@ Beacon — Internal engagement discovery portal for AppHelix. Centralized catalo
 
 - Start at `docs/OVERVIEW.md` for the complete documentation map.
 - `README.md` stays at the repository root as the top-level entry point.
+
+## AI Execution Reference
+
+- Canonical AI implementation policy is defined in `docs/AI-GUIDELINE.md`.
+- Keep AI-specific governance rules centralized there to avoid policy drift.

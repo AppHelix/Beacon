@@ -1,6 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+export const dynamic = "force-dynamic";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface Engagement {
   id: number;
@@ -35,13 +38,36 @@ const fetchEngagements = async (): Promise<Engagement[]> => {
   }
 };
 
-export default function EngagementCatalog() {
+function EngagementCatalogContent() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPath = pathname ?? "/engagements";
+  const getParam = (key: string) => searchParams?.get(key) ?? "";
   const [engagements, setEngagements] = useState<Engagement[]>([]);
-  const [filter, setFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [filter, setFilter] = useState(getParam("q"));
+  const [statusFilter, setStatusFilter] = useState(getParam("status"));
+  const [sort, setSort] = useState(getParam("sort") || "updated-desc");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const pageParam = Number(getParam("page") || "1");
+  const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+  const pageSize = 9;
+
+  const updateQuery = (updates: Record<string, string | undefined>) => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    const query = params.toString();
+    router.replace(query ? `${currentPath}?${query}` : currentPath, { scroll: false });
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -53,6 +79,54 @@ export default function EngagementCatalog() {
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    setFilter(searchParams?.get("q") ?? "");
+    setStatusFilter(searchParams?.get("status") ?? "");
+    setSort(searchParams?.get("sort") ?? "updated-desc");
+  }, [searchParams]);
+
+  const filteredEngagements = useMemo(() => {
+    const filtered = engagements.filter(e => {
+      const matchesSearch =
+        !filter ||
+        e.name.toLowerCase().includes(filter.toLowerCase()) ||
+        e.clientName.toLowerCase().includes(filter.toLowerCase());
+      const matchesStatus = !statusFilter || e.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sort) {
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "updated-asc":
+          return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+        case "updated-desc":
+        default:
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      }
+    });
+
+    return sorted;
+  }, [engagements, filter, sort, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEngagements.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedEngagements = filteredEngagements.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  useEffect(() => {
+    if (currentPage !== safePage) {
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      params.set("page", String(safePage));
+      const query = params.toString();
+      router.replace(query ? `${currentPath}?${query}` : currentPath, { scroll: false });
+    }
+  }, [currentPage, currentPath, router, safePage, searchParams]);
+
+  const statuses = Array.from(new Set(engagements.map(e => e.status)));
 
   if (status === "loading") {
     return (
@@ -79,39 +153,34 @@ export default function EngagementCatalog() {
     );
   }
 
-  const filteredEngagements = engagements.filter(e => {
-    const matchesSearch =
-      !filter ||
-      e.name.toLowerCase().includes(filter.toLowerCase()) ||
-      e.clientName.toLowerCase().includes(filter.toLowerCase());
-    const matchesStatus = !statusFilter || e.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const statuses = Array.from(new Set(engagements.map(e => e.status)));
-
   return (
     <div className="p-4 md:p-8 min-h-screen bg-slate-50">
       <h1 className="text-3xl font-bold mb-6">Engagement Catalog</h1>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-none">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <input
           type="text"
           placeholder="Filter by name or client..."
           value={filter}
-          onChange={e => setFilter(e.target.value)}
-          className="p-2 border rounded"
+          onChange={e => {
+            setFilter(e.target.value);
+            updateQuery({ q: e.target.value || undefined, page: "1" });
+          }}
+          className="p-2 border rounded-none"
         />
         <select
           value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="p-2 border rounded"
+          onChange={e => {
+            setStatusFilter(e.target.value);
+            updateQuery({ status: e.target.value || undefined, page: "1" });
+          }}
+          className="p-2 border rounded-none"
         >
           <option value="">All Status</option>
           {statuses.map(status => (
@@ -119,6 +188,19 @@ export default function EngagementCatalog() {
               {status}
             </option>
           ))}
+        </select>
+        <select
+          value={sort}
+          onChange={e => {
+            setSort(e.target.value);
+            updateQuery({ sort: e.target.value, page: "1" });
+          }}
+          className="p-2 border rounded-none"
+        >
+          <option value="updated-desc">Newest Updated</option>
+          <option value="updated-asc">Oldest Updated</option>
+          <option value="name-asc">Name A-Z</option>
+          <option value="name-desc">Name Z-A</option>
         </select>
       </div>
 
@@ -129,8 +211,8 @@ export default function EngagementCatalog() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredEngagements.map(e => (
-          <div key={e.id} className="p-4 border rounded shadow hover:shadow-lg bg-white">
+        {paginatedEngagements.map(e => (
+          <div key={e.id} className="p-4 border rounded-none shadow hover:shadow-lg bg-white">
             <h2 className="font-bold text-lg mb-1">{e.name}</h2>
             <p className="text-sm text-gray-600 mb-2">Client: {e.clientName}</p>
             <p className="text-sm mb-2">
@@ -148,15 +230,53 @@ export default function EngagementCatalog() {
                 Tags: {e.techTags}
               </p>
             )}
-            <a
-              href={`/engagements/${e.id}`}
-              className="mt-4 block text-center bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+            <Link
+              href={`/engagements/${e.id}?tab=overview`}
+              className="mt-4 block text-center bg-blue-600 text-white p-2 rounded-none hover:bg-blue-700"
             >
               View Details
-            </a>
+            </Link>
           </div>
         ))}
       </div>
+
+      {!isLoading && filteredEngagements.length > 0 && (
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Page {safePage} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              className="px-3 py-1 border rounded-none disabled:opacity-50"
+              onClick={() => updateQuery({ page: safePage > 1 ? String(safePage - 1) : "1" })}
+              disabled={safePage <= 1}
+            >
+              Previous
+            </button>
+            <button
+              className="px-3 py-1 border rounded-none disabled:opacity-50"
+              onClick={() => updateQuery({ page: safePage < totalPages ? String(safePage + 1) : String(totalPages) })}
+              disabled={safePage >= totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function EngagementCatalog() {
+  return (
+    <Suspense
+      fallback={(
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      )}
+    >
+      <EngagementCatalogContent />
+    </Suspense>
   );
 }

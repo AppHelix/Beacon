@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface Engagement {
   id: number;
@@ -51,11 +52,18 @@ const fetchSignals = async (): Promise<Signal[]> => {
 
 export default function EngagementDetail({ params }: { params: { id: string } }) {
   const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
   const [engagement, setEngagement] = useState<Engagement | null>(null);
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [activeTab, setActiveTab] = useState("Overview");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const activeTab = (() => {
+    const tab = (searchParams?.get("tab") ?? "overview").toLowerCase();
+    if (tab === "signals") return "signals";
+    if (tab === "details") return "details";
+    return "overview";
+  })();
 
   useEffect(() => {
     setIsLoading(true);
@@ -108,9 +116,31 @@ export default function EngagementDetail({ params }: { params: { id: string } })
   if (error) return <div className="p-4 md:p-8 text-red-600">{error}</div>;
   if (!engagement) return <div className="p-4 md:p-8">Engagement not found</div>;
 
-  const techTagsArray = engagement.techTags
-    ? JSON.parse(engagement.techTags)
-    : [];
+  let techTagsArray: string[] = [];
+  if (engagement.techTags) {
+    try {
+      if (Array.isArray(engagement.techTags)) {
+        techTagsArray = engagement.techTags;
+      } else if (typeof engagement.techTags === 'string') {
+        // Try JSON.parse first
+        try {
+          const parsed = JSON.parse(engagement.techTags);
+          if (Array.isArray(parsed)) {
+            techTagsArray = parsed;
+          } else if (typeof parsed === 'string') {
+            techTagsArray = parsed.split(',').map(t => t.trim()).filter(Boolean);
+          } else {
+            techTagsArray = [];
+          }
+        } catch {
+          // Not JSON, treat as comma-separated string
+          techTagsArray = engagement.techTags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+      }
+    } catch {
+      techTagsArray = [];
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
@@ -118,12 +148,12 @@ export default function EngagementDetail({ params }: { params: { id: string } })
         ← Back to Catalog
       </Link>
 
-      <div className="bg-white rounded shadow-md p-6 mb-6">
+      <div className="bg-white rounded-none shadow-md p-6 mb-6">
         <h1 className="text-3xl font-bold mb-2">{engagement.name}</h1>
         <p className="text-gray-600 mb-4">Client: <span className="font-semibold">{engagement.clientName}</span></p>
         
         <div className="flex gap-4 mb-4">
-          <span className={`px-3 py-1 rounded text-sm font-semibold ${
+          <span className={`px-3 py-1 rounded-none text-sm font-semibold ${
             engagement.status === 'Active' ? 'bg-green-100 text-green-700' :
             engagement.status === 'Paused' ? 'bg-yellow-100 text-yellow-700' :
             'bg-gray-100 text-gray-700'
@@ -140,7 +170,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
             <p className="text-sm font-semibold text-gray-700 mb-2">Tech Tags:</p>
             <div className="flex flex-wrap gap-2">
               {techTagsArray.map((tag: string, idx: number) => (
-                <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs">
+                <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-none text-xs">
                   {tag}
                 </span>
               ))}
@@ -149,25 +179,29 @@ export default function EngagementDetail({ params }: { params: { id: string } })
         )}
       </div>
 
-      <div className="bg-white rounded shadow-md">
+      <div className="bg-white rounded-none shadow-md">
         <div className="flex border-b">
-          {["Overview", "Signals", "Details"].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+          {[
+            { key: "overview", label: "Overview" },
+            { key: "signals", label: "Signals" },
+            { key: "details", label: "Details" },
+          ].map(tab => (
+            <Link
+              key={tab.key}
+              href={`/engagements/${params.id}?tab=${tab.key}`}
               className={`flex-1 px-4 py-3 text-center font-semibold border-b-2 transition ${
-                activeTab === tab
+                activeTab === tab.key
                   ? "bg-blue-50 text-blue-600 border-blue-600"
                   : "text-gray-600 border-transparent hover:bg-gray-50"
               }`}
             >
-              {tab}
-            </button>
+              {tab.label}
+            </Link>
           ))}
         </div>
 
         <div className="p-6">
-          {activeTab === "Overview" && (
+          {activeTab === "overview" && (
             <div>
               <h3 className="text-lg font-semibold mb-4">Description</h3>
               <p className="text-gray-600">
@@ -176,7 +210,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
             </div>
           )}
 
-          {activeTab === "Signals" && (
+          {activeTab === "signals" && (
             <div>
               <h3 className="text-lg font-semibold mb-4">Related Signals ({signals.length})</h3>
               {signals.length === 0 ? (
@@ -184,10 +218,10 @@ export default function EngagementDetail({ params }: { params: { id: string } })
               ) : (
                 <div className="space-y-4">
                   {signals.map(signal => (
-                    <div key={signal.id} className="border rounded p-4 hover:bg-gray-50">
+                    <div key={signal.id} className="border rounded-none p-4 hover:bg-gray-50">
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-semibold text-gray-800">{signal.title}</h4>
-                        <span className={`text-xs px-2 py-1 rounded ${
+                        <span className={`text-xs px-2 py-1 rounded-none ${
                           signal.urgency === 'high' ? 'bg-red-100 text-red-700' :
                           signal.urgency === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-green-100 text-green-700'
@@ -206,7 +240,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
             </div>
           )}
 
-          {activeTab === "Details" && (
+          {activeTab === "details" && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

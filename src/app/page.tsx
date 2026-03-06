@@ -1,129 +1,359 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
+import {
+  Activity,
+  Bell,
+  ChevronDown,
+  Compass,
+  FolderKanban,
+  Home as HomeIcon,
+  Menu,
+  Shield,
+  Users,
+} from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const userInitials =
+    session?.user?.name
+      ?.split(" ")
+      .map(chunk => chunk[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "US";
+
+  const primaryNav = [
+    { href: "/", label: "Home", icon: HomeIcon, tip: "Go to home dashboard" },
+    { href: "/engagements", label: "Engagements", icon: FolderKanban, tip: "Browse all engagements" },
+    { href: "/signals", label: "Signals", icon: Bell, tip: "Track and respond to signals" },
+    { href: "/people", label: "People", icon: Users, tip: "Find teammates and collaborators" },
+    { href: "/admin", label: "Admin", icon: Shield, tip: "Open administration tools" },
+  ];
+
+  const quickActions = [
+    {
+      href: "/engagements",
+      icon: FolderKanban,
+      tip: "Engagement catalog",
+      title: "Engagements",
+      description: "Browse projects, clients, and delivery status.",
+      cta: "Open Engagement Catalog",
+      variant: "default" as const,
+    },
+    {
+      href: "/signals",
+      icon: Bell,
+      tip: "Signal board",
+      title: "Signals",
+      description: "Find blockers, post help requests, and track progress.",
+      cta: "Open Signal Board",
+      variant: "secondary" as const,
+    },
+    {
+      href: "/people",
+      icon: Users,
+      tip: "People directory",
+      title: "People",
+      description: "Find teammates by role and collaboration context.",
+      cta: "Open People Directory",
+      variant: "outline" as const,
+    },
+    {
+      href: "/admin",
+      icon: Shield,
+      tip: "Admin console",
+      title: "Admin",
+      description: "Manage users, settings, and system governance.",
+      cta: "Open Admin Console",
+      variant: "ghost" as const,
+    },
+  ];
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
-        <p className="text-white text-xl">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-xl text-foreground">Loading...</p>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-white mb-4">🚀 Beacon</h1>
-          <p className="text-gray-300 text-xl mb-8">Collaboration Engine</p>
-          <p className="text-gray-400 mb-8 max-w-md">
-            Sign in with your Azure AD account to access engagements, signals, team collaboration, and more.
-          </p>
-          <button
-            onClick={() => signIn("azure-ad")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition"
-          >
-            Sign In with Azure AD
-          </button>
+      <TooltipProvider>
+        <div className="min-h-screen bg-background text-foreground">
+          <div className="mx-auto grid w-full max-w-[1600px] gap-8 px-6 py-16 lg:grid-cols-4 xl:px-12">
+            <Card className="rounded-none shadow-sm lg:col-span-3">
+              <CardHeader className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Compass className="h-6 w-6 text-primary" aria-label="Beacon overview" />
+                    </TooltipTrigger>
+                    <TooltipContent className="rounded-none">Beacon platform overview</TooltipContent>
+                  </Tooltip>
+                  <p className="text-sm font-semibold tracking-wide text-primary">AppHelix Internal Platform</p>
+                </div>
+                <CardTitle className="text-4xl font-bold sm:text-5xl">Beacon</CardTitle>
+                <CardDescription className="max-w-xl text-lg text-muted-foreground">
+                  One place to discover engagements, post or resolve Signals, and connect with the right people across teams.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3">
+                  <div className="rounded-none border bg-muted p-4 text-sm">
+                    <p className="font-semibold text-foreground">1. Discover</p>
+                    <p className="mt-1 text-muted-foreground">Search active engagements and current priorities.</p>
+                  </div>
+                  <div className="rounded-none border bg-muted p-4 text-sm">
+                    <p className="font-semibold text-foreground">2. Collaborate</p>
+                    <p className="mt-1 text-muted-foreground">Raise or respond to Signals with clear ownership.</p>
+                  </div>
+                  <div className="rounded-none border bg-muted p-4 text-sm">
+                    <p className="font-semibold text-foreground">3. Deliver</p>
+                    <p className="mt-1 text-muted-foreground">Track outcomes and scale proven solutions.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-none shadow-sm lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-2xl">Sign in to continue</CardTitle>
+                <CardDescription>Use your Azure AD account to access Beacon dashboard features.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  onClick={() => signIn("azure-ad")}
+                  className="w-full rounded-none px-8 py-3 text-base font-semibold"
+                >
+                  Sign In with Azure AD
+                </Button>
+                <p className="text-sm text-muted-foreground">Internal use only — AppHelix employees and authorized members.</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-      {/* Navigation */}
-      <nav className="bg-slate-950 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-white">🚀 Beacon</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-300 text-sm">Welcome, {session.user?.name}</span>
-              <button
-                onClick={() => signOut()}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-              >
-                Sign Out
-              </button>
+    <TooltipProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <header className="border-b bg-card text-card-foreground">
+          <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 px-4 py-4 sm:px-6 xl:px-12">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold">Beacon</h1>
+                <Badge variant="secondary" className="rounded-none">Light Theme</Badge>
+              </div>
+
+              <div className="flex flex-1 items-center justify-end gap-3 lg:max-w-2xl">
+                <Input
+                  aria-label="Global search"
+                  placeholder="Search engagements, signals, people..."
+                  className="hidden rounded-none md:block"
+                />
+
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" className="rounded-none md:hidden">
+                      <Menu className="h-4 w-4" />
+                      Menu
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="rounded-none">
+                    <SheetHeader>
+                      <SheetTitle>Navigate Beacon</SheetTitle>
+                      <SheetDescription>Open core sections quickly from mobile navigation.</SheetDescription>
+                    </SheetHeader>
+                    <div className="mt-6 flex flex-col gap-2">
+                      {primaryNav.map(item => (
+                        <Button key={item.href} asChild variant="ghost" className="justify-start rounded-none">
+                          <Link href={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                          </Link>
+                        </Button>
+                      ))}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="rounded-none">
+                      <Avatar className="h-6 w-6 rounded-none">
+                        <AvatarFallback className="rounded-none text-xs">{userInitials}</AvatarFallback>
+                      </Avatar>
+                      <span className="max-w-36 truncate">{session.user?.name || "User"}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="rounded-none">
+                    <DropdownMenuLabel>Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Profile</DropdownMenuItem>
+                    <DropdownMenuItem>Preferences</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive" onClick={() => signOut()}>
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            <NavigationMenu className="max-w-full justify-start">
+              <NavigationMenuList className="justify-start gap-1">
+                {primaryNav.map(item => (
+                  <NavigationMenuItem key={item.href}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              navigationMenuTriggerStyle(),
+                              "h-9 rounded-none gap-2",
+                              item.href === "/" && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                            )}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            {item.label}
+                          </Link>
+                        </NavigationMenuLink>
+                      </TooltipTrigger>
+                      <TooltipContent className="rounded-none">{item.tip}</TooltipContent>
+                    </Tooltip>
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+        </header>
+
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-10 sm:px-6 xl:px-12">
+        <Card className="rounded-none shadow-sm">
+          <CardHeader>
+          <p className="text-sm font-semibold uppercase tracking-wide text-primary">Start Here</p>
+          <CardTitle className="mt-2 text-3xl font-bold">Use Beacon in 3 simple steps</CardTitle>
+          <CardDescription className="mt-3 max-w-3xl text-muted-foreground">
+            Discover active work, collaborate through Signals, and connect with the right people. Use the cards below to navigate quickly.
+          </CardDescription>
+          </CardHeader>
+          <CardContent>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-none border bg-muted p-4 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">Step 1:</span> Open Engagements to understand current projects.
+            </div>
+            <div className="rounded-none border bg-muted p-4 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">Step 2:</span> Visit Signals to ask for help or respond to blockers.
+            </div>
+            <div className="rounded-none border bg-muted p-4 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">Step 3:</span> Use People/Admin for collaboration and governance.
             </div>
           </div>
-        </div>
-      </nav>
+          </CardContent>
+        </Card>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Engagements Card */}
-          <Link href="/engagements">
-            <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition p-6 cursor-pointer">
-              <div className="text-4xl mb-4">📋</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Engagements</h2>
-              <p className="text-gray-600 mb-4">
-                Manage and track all active engagements
-              </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
-                View Catalog
-              </button>
+        <Separator className="my-8" />
+
+        <section className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {quickActions.map(action => (
+            <Card
+              key={action.href}
+              className="flex h-full flex-col rounded-none shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <CardHeader>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <action.icon className="h-7 w-7 text-foreground" aria-label={action.tip} />
+                  </TooltipTrigger>
+                  <TooltipContent className="rounded-none">{action.tip}</TooltipContent>
+                </Tooltip>
+                <CardTitle className="mt-2 text-2xl font-semibold">{action.title}</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">{action.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <Button asChild variant={action.variant} className="w-full rounded-none text-sm font-semibold">
+                  <Link href={action.href}>{action.cta}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+
+        <Separator className="my-8" />
+
+        <Card className="mt-8 rounded-none shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Activity className="h-5 w-5 text-foreground" aria-label="Guidance and tips" />
+                </TooltipTrigger>
+                <TooltipContent className="rounded-none">Guidance for first-time users</TooltipContent>
+              </Tooltip>
+              <CardTitle className="text-2xl font-bold">Need guidance?</CardTitle>
             </div>
-          </Link>
-
-          {/* Signals Card */}
-          <Link href="/signals">
-            <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition p-6 cursor-pointer">
-              <div className="text-4xl mb-4">🔔</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Signals</h2>
-              <p className="text-gray-600 mb-4">
-                Create and collaborate on project signals
-              </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
-                View Board
-              </button>
-            </div>
-          </Link>
-
-          {/* People Directory Card */}
-          <Link href="/people">
-            <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition p-6 cursor-pointer">
-              <div className="text-4xl mb-4">👥</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">People</h2>
-              <p className="text-gray-600 mb-4">
-                Explore team members and their expertise
-              </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">
-                Directory
-              </button>
-            </div>
-          </Link>
-
-          {/* Admin Card */}
-          <Link href="/admin">
-            <div className="bg-white rounded-lg shadow-lg hover:shadow-xl transition p-6 cursor-pointer">
-              <div className="text-4xl mb-4">⚙️</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Admin</h2>
-              <p className="text-gray-600 mb-4">
-                Manage system settings and users
-              </p>
-              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded w-full">
-                Settings
-              </button>
-            </div>
-          </Link>
-        </div>
-
-        {/* Welcome Section */}
-        <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome to Beacon</h2>
-          <p className="text-gray-600 mb-4">
-            Beacon is a collaborative platform for managing engagements, tracking signals, and building high-performing teams.
-          </p>
-          <p className="text-gray-600">
-            Use the navigation above to explore engagements, create signals, connect with team members, and configure system settings.
-          </p>
-        </div>
+            <CardDescription className="mt-3 text-muted-foreground">
+            New to Beacon? Start with Engagements, then move to Signals when you need help or can contribute expertise.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+            <li>Use consistent filters to narrow by status, urgency, and role.</li>
+            <li>Open detail pages to understand context before taking action.</li>
+            <li>Capture outcomes clearly so future users can reuse solutions.</li>
+          </ul>
+          </CardContent>
+        </Card>
+      </main>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

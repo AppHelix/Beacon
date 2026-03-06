@@ -1,51 +1,52 @@
-## Beacon – 12-Week / 12-Phase Execution Checklist
+> LOCKED FORMAT POLICY: This file is status-only. Allowed status markers are `[x]` (black check/complete), `[-]` (partial), and `[ ]` (not started).
+> AI must not rewrite task text, reorder sections, alter headings, or modify any content except status markers.
 
-This tracker expands `PROJECT-PLAN.md` into weekly execution phases.
-Mark each item `[x]` only when it is delivered, tested, and demo-ready.
+## Beacon – 12-Week / 12-Phase Execution Checklist
 
 ---
 
 ## Phase 01 (Week 1) — Project Foundation
 
-- [ ] Initialize Next.js 14+ app (App Router) with TypeScript.
-- [ ] Configure Tailwind CSS, shadcn/ui, ESLint, and Prettier.
-- [ ] Set up base folder structure (`app`, `features`, `lib`, `db`, `components`).
-- [ ] Add environment variable template and local setup instructions.
-- [ ] Define baseline CI workflow skeleton (lint/test/build jobs scaffolded).
-- [ ] Week 1 exit check: repository boots locally with lint passing.
+- [x] Initialize Next.js 14+ app (App Router) with TypeScript.
+- [x] Configure Tailwind CSS, shadcn/ui, ESLint, and Prettier.
+- [x] Set up base folder structure (`app`, `features`, `lib`, `db`, `components`).
+- [x] Add environment variable template and local setup instructions.
+- [x] Define baseline CI workflow skeleton (lint/test/build jobs scaffolded).
+- [x] Week 1 exit check: repository boots locally with lint passing.
 
 ## Phase 02 (Week 2) — Data + Auth Core
 
-- [ ] Provision PostgreSQL and enable required extensions (`pg_trgm`, prep for `pgvector`).
-- [ ] Add Drizzle ORM and create core schema (users, engagements, tech tags).
-- [ ] Run initial migrations and validate schema in local/dev DB.
-- [ ] Integrate Azure AD SSO via NextAuth.js (login/logout/session).
-- [ ] Add auth guards for protected routes and API boundaries.
-- [ ] Week 2 exit check: authenticated user can sign in and persist session.
+- [x] Provision PostgreSQL and enable required extensions (`pg_trgm`, prep for `pgvector`).
+- [x] Add Drizzle ORM and create core schema (users, engagements, tech tags).
+- [x] Run initial migrations and validate schema in local/dev DB.
+- [x] Integrate Azure AD SSO via NextAuth.js (login/logout/session).
+- [x] Add auth guards for protected routes and API boundaries.
+- [x] Week 2 exit check: authenticated user can sign in and persist session.
 
 ## Phase 03 (Week 3) — Engagement MVP + Baseline Quality
 
-- [ ] Build Engagement CRUD (create, read, update).
-- [ ] Implement Engagement Catalog with card grid, basic search, and status filter.
-- [ ] Implement Engagement Detail page with core tabbed layout.
-- [ ] Deliver responsive layout skeleton for Home, Engagements, Signals, People, Admin.
-- [ ] Add Vitest unit/integration baseline and first Playwright login/catalog E2E.
-- [ ] Activate CI checks for lint, tests, and build.
-- [ ] Week 3 exit check: Foundation phase shippable increment is complete.
 
----
+ [x] Build Engagement CRUD (create, read, update).
+ [x] Implement Engagement Catalog with card grid, basic search, and status filter.
+ [x] Implement Engagement Detail page with core tabbed layout.
+ [x] Deliver responsive layout skeleton for Home, Engagements, Signals, People, Admin.
+ [x] Add Vitest unit/integration baseline and first Playwright login/catalog E2E.
+ [x] Activate CI checks for lint, tests, and build.
+ [x] Week 3 exit check: Foundation phase shippable increment is complete.
+
 
 ## Phase 04 (Week 4) — Signals Creation + Lifecycle Start
 
-- [ ] Implement Signal entity and full create/read/update APIs.
-- [ ] Add Signal creation UX from both global board and engagement context.
-- [ ] Implement initial statuses (`Open`, `In Progress`, `Resolved`, `Closed`).
+- [x] Implement Signal entity and full create/read/update APIs.
+- [-] Add Signal creation UX from both global board and engagement context.
+- [-] Implement initial statuses (`Open`, `In Progress`, `Resolved`, `Closed`).
 - [ ] Add Signal Detail page with problem statement and metadata.
 - [ ] Week 4 exit check: users can create and track Signals end to end.
 
+ [x] Week 03: Baseline query indexes in place and validated.
 ## Phase 05 (Week 5) — Collaboration Workflows
 
-- [ ] Implement Signal Board list + Kanban views with filter/sort.
+- [-] Implement Signal Board list + Kanban views with filter/sort.
 - [ ] Add hand-raise workflow and suggestion responses.
 - [ ] Add resolution summary capture on `Resolved` transition.
 - [ ] Add in-app notifications for Signal responses and hand-raises.
@@ -53,13 +54,14 @@ Mark each item `[x]` only when it is delivered, tested, and demo-ready.
 
 ## Phase 06 (Week 6) — People + RBAC Hardening
 
-- [ ] Build People Directory with search and skill filtering.
+- [x] Build People Directory with search and skill filtering.
 - [ ] Add team membership management on engagement profiles.
 - [ ] Enforce RBAC roles across UI + API (Admin, Curator, Member, Viewer).
 - [ ] Expand Playwright coverage for full Signal lifecycle and role-sensitive flows.
 - [ ] Week 6 exit check: Collaboration Engine phase meets access and workflow goals.
 
 ---
+
 
 ## Phase 07 (Week 7) — AI Data Layer
 
@@ -68,6 +70,7 @@ Mark each item `[x]` only when it is delivered, tested, and demo-ready.
 - [ ] Build retrieval layer for semantic query context.
 - [ ] Validate retrieval quality on seeded project data.
 - [ ] Week 7 exit check: RAG data pipeline is operational.
+
 
 ## Phase 08 (Week 8) — Beacon AI Assistant
 
@@ -141,7 +144,7 @@ For each Week/Phase (01–12), publish evidence with links:
 
 ## Data & Platform Hardening Milestones
 
-- [ ] Week 02: Core schema constraints enforced (`NOT NULL`, PK/FK, required uniques).
+- [x] Week 02: Core schema constraints enforced (`NOT NULL`, PK/FK, required uniques).
 - [ ] Week 03: Baseline query indexes in place and validated.
 - [ ] Week 06: RBAC policy matrix implemented and admin audit events enabled.
 - [ ] Week 07: Vector/AI data model hardened with retention and refresh rules.

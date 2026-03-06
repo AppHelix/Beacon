@@ -15,6 +15,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/api/auth/signin",
+    error: "/auth/error",
   },
   callbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

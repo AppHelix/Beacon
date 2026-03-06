@@ -50,3 +50,12 @@ During bootstrap development (Weeks 1–4), teams may use a reduced subset while
 - [ ] SLO metrics stable (latency, error rate, saturation).
 - [ ] No critical alert bursts during observation window.
 - [ ] Release marked complete with evidence links.
+
+## 7) UX Acceptance Gate (From Wireframes)
+
+- [ ] Page purpose is clear within one glance.
+- [ ] Primary action is obvious within 5 seconds.
+- [ ] Navigation path is clear without external explanation.
+- [ ] Empty/loading/error/success states are implemented.
+- [ ] UI styling and interaction patterns are consistent across core pages.
+- [ ] First-time user can complete intended journey without support assistance.
