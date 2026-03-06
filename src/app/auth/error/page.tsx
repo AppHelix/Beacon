@@ -1,7 +1,6 @@
 
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-export const dynamic = "force-dynamic";
 "use client";
+export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { signIn } from "next-auth/react";
