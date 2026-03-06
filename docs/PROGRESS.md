@@ -25,10 +25,23 @@
 
 ## Phase 03 (Week 3) — Engagement MVP + Baseline Quality
 
+
  [x] Build Engagement CRUD (create, read, update).
+ [x] Implement Engagement Catalog with card grid, basic search, and status filter.
+ [x] Implement Engagement Detail page with core tabbed layout.
+ [x] Deliver responsive layout skeleton for Home, Engagements, Signals, People, Admin.
+ [x] Add Vitest unit/integration baseline and first Playwright login/catalog E2E.
+ [x] Activate CI checks for lint, tests, and build.
  [x] Week 3 exit check: Foundation phase shippable increment is complete.
 
----
+
+## Phase 04 (Week 4) — Signals Creation + Lifecycle Start
+
+- [x] Implement Signal entity and full create/read/update APIs.
+- [-] Add Signal creation UX from both global board and engagement context.
+- [-] Implement initial statuses (`Open`, `In Progress`, `Resolved`, `Closed`).
+- [ ] Add Signal Detail page with problem statement and metadata.
+- [ ] Week 4 exit check: users can create and track Signals end to end.
 
  [x] Week 03: Baseline query indexes in place and validated.
 ## Phase 05 (Week 5) — Collaboration Workflows
@@ -41,13 +54,14 @@
 
 ## Phase 06 (Week 6) — People + RBAC Hardening
 
-- [-] Build People Directory with search and skill filtering.
+- [x] Build People Directory with search and skill filtering.
 - [ ] Add team membership management on engagement profiles.
 - [ ] Enforce RBAC roles across UI + API (Admin, Curator, Member, Viewer).
 - [ ] Expand Playwright coverage for full Signal lifecycle and role-sensitive flows.
 - [ ] Week 6 exit check: Collaboration Engine phase meets access and workflow goals.
 
 ---
+
 
 ## Phase 07 (Week 7) — AI Data Layer
 
@@ -56,6 +70,7 @@
 - [ ] Build retrieval layer for semantic query context.
 - [ ] Validate retrieval quality on seeded project data.
 - [ ] Week 7 exit check: RAG data pipeline is operational.
+
 
 ## Phase 08 (Week 8) — Beacon AI Assistant
 
