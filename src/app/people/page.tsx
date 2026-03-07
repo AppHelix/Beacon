@@ -221,11 +221,3 @@ export default function PeopleDirectory() {
     </Suspense>
   );
 }
-
-export default function PeopleDirectory() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ClientPeopleDirectory />
-    </Suspense>
-  );
-}

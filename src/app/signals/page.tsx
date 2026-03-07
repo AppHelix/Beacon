@@ -253,17 +253,3 @@ export default function SignalBoard() {
     </Suspense>
   );
 }
-
-export default function SignalBoard() {
-  return (
-    <Suspense
-      fallback={(
-        <div className="min-h-screen flex items-center justify-center">
-          <p>Loading...</p>
-        </div>
-      )}
-    >
-      <SignalBoardContent />
-    </Suspense>
-  );
-}

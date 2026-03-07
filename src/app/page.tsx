@@ -3,10 +3,11 @@ import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import {
   Activity,
-  FolderKanban,
   Bell,
-  Users,
+  FolderKanban,
+  Home as HomeIcon,
   Shield,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,37 +77,6 @@ export default function Home() {
     },
   ];
 
-  const quickActions = [
-    {
-      href: "/engagements",
-      icon: FolderKanban,
-      title: "Engagements",
-      description: "Discover and participate in active work engagements",
-      cta: "Browse Engagements",
-    },
-    {
-      href: "/signals",
-      icon: Bell,
-      title: "Signals",
-      description: "Raise hand for help or respond to blockers",
-      cta: "View Signals",
-    },
-    {
-      href: "/people",
-      icon: Users,
-      title: "People",
-      description: "Connect with colleagues and find expertise",
-      cta: "Find People",
-    },
-    {
-      href: "/admin",
-      icon: Shield,
-      title: "Admin",
-      description: "Manage settings and system governance",
-      cta: "Open Admin",
-    },
-  ];
-
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
@@ -128,7 +98,7 @@ export default function Home() {
             Sign In with Azure AD
           </Button>
         </div>
-      </TooltipProvider>
+      </div>
     );
   }
 
