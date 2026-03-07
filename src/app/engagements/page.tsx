@@ -321,3 +321,17 @@ export default function EngagementCatalog() {
     </Suspense>
   );
 }
+
+export default function EngagementCatalog() {
+  return (
+    <Suspense
+      fallback={(
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      )}
+    >
+      <EngagementCatalogContent />
+    </Suspense>
+  );
+}

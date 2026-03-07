@@ -21,6 +21,60 @@ import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const userInitials =
+    session?.user?.name
+      ?.split(" ")
+      .map(chunk => chunk[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "US";
+
+  const primaryNav = [
+    { href: "/", label: "Home", icon: HomeIcon, tip: "Go to home dashboard" },
+    { href: "/engagements", label: "Engagements", icon: FolderKanban, tip: "Browse all engagements" },
+    { href: "/signals", label: "Signals", icon: Bell, tip: "Track and respond to signals" },
+    { href: "/people", label: "People", icon: Users, tip: "Find teammates and collaborators" },
+    { href: "/admin", label: "Admin", icon: Shield, tip: "Open administration tools" },
+  ];
+
+  const quickActions = [
+    {
+      href: "/engagements",
+      icon: FolderKanban,
+      tip: "Engagement catalog",
+      title: "Engagements",
+      description: "Browse projects, clients, and delivery status.",
+      cta: "Open Engagement Catalog",
+      variant: "default" as const,
+    },
+    {
+      href: "/signals",
+      icon: Bell,
+      tip: "Signal board",
+      title: "Signals",
+      description: "Find blockers, post help requests, and track progress.",
+      cta: "Open Signal Board",
+      variant: "secondary" as const,
+    },
+    {
+      href: "/people",
+      icon: Users,
+      tip: "People directory",
+      title: "People",
+      description: "Find teammates by role and collaboration context.",
+      cta: "Open People Directory",
+      variant: "outline" as const,
+    },
+    {
+      href: "/admin",
+      icon: Shield,
+      tip: "Admin console",
+      title: "Admin",
+      description: "Manage users, settings, and system governance.",
+      cta: "Open Admin Console",
+      variant: "ghost" as const,
+    },
+  ];
 
   const quickActions = [
     {
@@ -74,7 +128,7 @@ export default function Home() {
             Sign In with Azure AD
           </Button>
         </div>
-      </div>
+      </TooltipProvider>
     );
   }
 
