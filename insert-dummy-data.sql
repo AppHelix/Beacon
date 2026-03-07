@@ -17,7 +17,7 @@ INSERT INTO users (name, email, role) VALUES
   ('Carol Williams', 'carol@apphelix.com', 'Member'),
   ('David Brown', 'david@apphelix.com', 'Viewer'),
   ('Eve Davis', 'eve@apphelix.com', 'Member')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (email) DO NOTHING;
 
 -- Insert Engagements
 INSERT INTO engagements (name, client_name, status, description, tech_tags, created_at, updated_at) VALUES 

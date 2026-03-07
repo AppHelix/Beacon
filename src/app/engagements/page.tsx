@@ -4,6 +4,11 @@ import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SidebarLayout } from "@/components/SidebarLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Engagement {
   id: number;
@@ -142,128 +147,164 @@ function EngagementCatalogContent() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Engagement Catalog</h1>
           <p className="text-gray-300 mb-8">You need to be signed in to view engagements.</p>
-          <button
+          <Button
             onClick={() => signIn("azure-ad")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+            className="bg-indigo-600 hover:bg-indigo-700 rounded-lg"
           >
             Sign In
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-8 min-h-screen bg-slate-50">
-      <h1 className="text-3xl font-bold mb-6">Engagement Catalog</h1>
-
+    <SidebarLayout
+      title="Engagements"
+      description="Discover and explore active projects and opportunities"
+    >
       {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-none">
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Filter by name or client..."
-          value={filter}
-          onChange={e => {
-            setFilter(e.target.value);
-            updateQuery({ q: e.target.value || undefined, page: "1" });
-          }}
-          className="p-2 border rounded-none"
-        />
-        <select
-          value={statusFilter}
-          onChange={e => {
-            setStatusFilter(e.target.value);
-            updateQuery({ status: e.target.value || undefined, page: "1" });
-          }}
-          className="p-2 border rounded-none"
-        >
-          <option value="">All Status</option>
-          {statuses.map(status => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-        <select
-          value={sort}
-          onChange={e => {
-            setSort(e.target.value);
-            updateQuery({ sort: e.target.value, page: "1" });
-          }}
-          className="p-2 border rounded-none"
-        >
-          <option value="updated-desc">Newest Updated</option>
-          <option value="updated-asc">Oldest Updated</option>
-          <option value="name-asc">Name A-Z</option>
-          <option value="name-desc">Name Z-A</option>
-        </select>
-      </div>
+      {/* Filters */}
+      <Card className="mb-8 border-slate-200 shadow-sm">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+            <div>
+              <label className="mb-3 block text-base font-semibold text-slate-700 dark:text-slate-300">Search</label>
+              <Input
+                type="text"
+                placeholder="Filter by name or client..."
+                value={filter}
+                onChange={e => {
+                  setFilter(e.target.value);
+                  updateQuery({ q: e.target.value || undefined, page: "1" });
+                }}
+                className="w-full rounded-lg border border-slate-300 p-3 text-base h-11 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-3 block text-base font-semibold text-slate-700 dark:text-slate-300">Status</label>
+              <select
+                value={statusFilter}
+                onChange={e => {
+                  setStatusFilter(e.target.value);
+                  updateQuery({ status: e.target.value || undefined, page: "1" });
+                }}
+                className="w-full rounded-lg border border-slate-300 p-3 text-base h-11 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+              >
+                <option value="">All Status</option>
+                {statuses.map(status => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-3 block text-base font-semibold text-slate-700 dark:text-slate-300">Sort By</label>
+              <select
+                value={sort}
+                onChange={e => {
+                  setSort(e.target.value);
+                  updateQuery({ sort: e.target.value, page: "1" });
+                }}
+                className="w-full rounded-lg border border-slate-300 p-3 text-base h-11 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+              >
+                <option value="updated-desc">Newest Updated</option>
+                <option value="updated-asc">Oldest Updated</option>
+                <option value="name-asc">Name A-Z</option>
+                <option value="name-desc">Name Z-A</option>
+              </select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {isLoading && <p className="text-gray-600">Loading engagement data...</p>}
+      {isLoading && <p className="text-lg text-slate-600 dark:text-slate-400 py-8 text-center">Loading engagement data...</p>}
 
       {!isLoading && filteredEngagements.length === 0 && !error && (
-        <p className="text-gray-600">No engagements found.</p>
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="py-16 text-center">
+            <p className="text-lg text-slate-600 dark:text-slate-400">No engagements found.</p>
+          </CardContent>
+        </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Engagement Cards */}
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {paginatedEngagements.map(e => (
-          <div key={e.id} className="p-4 border rounded-none shadow hover:shadow-lg bg-white">
-            <h2 className="font-bold text-lg mb-1">{e.name}</h2>
-            <p className="text-sm text-gray-600 mb-2">Client: {e.clientName}</p>
-            <p className="text-sm mb-2">
-              <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                e.status === 'Active' ? 'bg-green-100 text-green-700' :
-                e.status === 'Paused' ? 'bg-yellow-100 text-yellow-700' :
-                'bg-gray-100 text-gray-700'
-              }`}>
-                {e.status}
-              </span>
-            </p>
-            {e.description && <p className="text-xs text-gray-500 mb-2">{e.description}</p>}
-            {e.techTags && (
-              <p className="text-xs text-gray-500">
-                Tags: {e.techTags}
-              </p>
-            )}
-            <Link
-              href={`/engagements/${e.id}?tab=overview`}
-              className="mt-4 block text-center bg-blue-600 text-white p-2 rounded-none hover:bg-blue-700"
-            >
-              View Details
-            </Link>
-          </div>
+          <Card key={e.id} className="group overflow-hidden border-slate-200 shadow-sm transition-all hover:shadow-lg hover:border-indigo-200">
+            <CardHeader className="pb-4 bg-white dark:bg-slate-900 rounded-t-xl">
+              <div className="flex items-start justify-between gap-3">
+                <CardTitle className="break-words text-xl font-bold !text-slate-900 dark:!text-white leading-tight">
+                  {e.name}
+                </CardTitle>
+                <Badge
+                  className={
+                    e.status === 'Active'
+                      ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                      : e.status === 'Paused'
+                      ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-100'
+                  }
+                >
+                  {e.status}
+                </Badge>
+              </div>
+              <CardDescription className="text-base mt-2">
+                <span className="font-semibold text-slate-700 dark:text-slate-300">Client:</span> 
+                <span className="font-semibold text-slate-800 dark:text-white ml-1">{e.clientName}</span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {e.description && (
+                <p className="mb-4 break-words text-base text-slate-600 dark:text-slate-400 leading-relaxed">{e.description}</p>
+              )}
+              {e.techTags && (
+                <p className="mb-6 break-words text-sm text-slate-500 dark:text-slate-500">
+                  <span className="font-semibold">Tags:</span> 
+                  <span className="ml-1">{e.techTags}</span>
+                </p>
+              )}
+              <Button asChild className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-700 text-base font-semibold py-2.5 h-12">
+                <Link href={`/engagements/${e.id}?tab=overview`}>View Details</Link>
+              </Button>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
+      {/* Pagination */}
       {!isLoading && filteredEngagements.length > 0 && (
-        <div className="mt-6 flex items-center justify-between">
-          <p className="text-sm text-gray-600">
-            Page {safePage} of {totalPages}
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-base text-slate-600 dark:text-slate-400 font-medium">
+            Page {safePage} of {totalPages} ({filteredEngagements.length} total)
           </p>
           <div className="flex gap-2">
-            <button
-              className="px-3 py-1 border rounded-none disabled:opacity-50"
+            <Button
+              variant="outline"
               onClick={() => updateQuery({ page: safePage > 1 ? String(safePage - 1) : "1" })}
               disabled={safePage <= 1}
+              className="rounded-lg text-base font-semibold px-6 py-2.5 h-12"
             >
               Previous
-            </button>
-            <button
-              className="px-3 py-1 border rounded-none disabled:opacity-50"
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => updateQuery({ page: safePage < totalPages ? String(safePage + 1) : String(totalPages) })}
               disabled={safePage >= totalPages}
+              className="rounded-lg text-base font-semibold px-6 py-2.5 h-12"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
+    </SidebarLayout>
   );
 }
 
