@@ -14,14 +14,9 @@ import {
   Bell, 
   Shield, 
   Palette, 
-  Globe,
   Moon,
   Sun,
-  Monitor,
-  User,
-  Lock,
-  Download,
-  X
+  Monitor
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -50,7 +45,7 @@ export default function SettingsPage() {
       setHasUnsavedChanges(false);
       // Show success message (could use a toast library)
       alert('Settings saved successfully!');
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to save settings. Please try again.');
     } finally {
       setIsSaving(false);
@@ -136,7 +131,7 @@ export default function SettingsPage() {
                   disabled
                   className="rounded-lg border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-400"
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-400">Email cannot be changed as it's managed by Azure AD</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Email cannot be changed as it&rsquo;s managed by Azure AD</p>
               </div>
             </div>
           </CardContent>
@@ -382,7 +377,7 @@ export default function SettingsPage() {
             <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Request Data Export</h3>
               <p className="text-slate-600 dark:text-slate-400 mb-4">
-                We'll prepare a copy of your data and send you a download link via email. This may take a few minutes to process.
+                We&rsquo;ll prepare a copy of your data and send you a download link via email. This may take a few minutes to process.
               </p>
               <div className="space-y-3 mb-6">
                 <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">

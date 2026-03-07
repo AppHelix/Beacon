@@ -5,7 +5,6 @@ import {
   Activity,
   Bell,
   FolderKanban,
-  Home as HomeIcon,
   Shield,
   Users,
 } from "lucide-react";
@@ -22,21 +21,6 @@ import { SidebarLayout } from "@/components/SidebarLayout";
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const userInitials =
-    session?.user?.name
-      ?.split(" ")
-      .map(chunk => chunk[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "US";
-
-  const primaryNav = [
-    { href: "/", label: "Home", icon: HomeIcon, tip: "Go to home dashboard" },
-    { href: "/engagements", label: "Engagements", icon: FolderKanban, tip: "Browse all engagements" },
-    { href: "/signals", label: "Signals", icon: Bell, tip: "Track and respond to signals" },
-    { href: "/people", label: "People", icon: Users, tip: "Find teammates and collaborators" },
-    { href: "/admin", label: "Admin", icon: Shield, tip: "Open administration tools" },
-  ];
 
   const quickActions = [
     {
