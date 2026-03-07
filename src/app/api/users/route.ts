@@ -12,7 +12,13 @@ export async function GET() {
 
   try {
     const allUsers = await db.select().from(users);
-    return NextResponse.json(allUsers);
+    
+    // Remove duplicates based on email (client-side deduplication until DB is fixed)
+    const uniqueUsers = allUsers.filter((user, index, self) => 
+      index === self.findIndex(u => u.email === user.email)
+    );
+    
+    return NextResponse.json(uniqueUsers);
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });

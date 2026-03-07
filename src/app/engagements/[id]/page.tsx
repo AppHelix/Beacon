@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { SidebarLayout } from "@/components/SidebarLayout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface Engagement {
   id: number;
@@ -101,20 +105,38 @@ export default function EngagementDetail({ params }: { params: { id: string } })
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Engagement Details</h1>
           <p className="text-gray-300 mb-8">You need to be signed in to view engagement details.</p>
-          <button
+          <Button
             onClick={() => signIn("azure-ad")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+            className="bg-indigo-600 hover:bg-indigo-700 rounded-lg"
           >
             Sign In
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
-  if (isLoading) return <div className="p-4 md:p-8">Loading...</div>;
-  if (error) return <div className="p-4 md:p-8 text-red-600">{error}</div>;
-  if (!engagement) return <div className="p-4 md:p-8">Engagement not found</div>;
+  if (isLoading) return (
+    <SidebarLayout title="Engagement Details">
+      <div className="text-slate-600">Loading...</div>
+    </SidebarLayout>
+  );
+
+  if (error) return (
+    <SidebarLayout title="Engagement Details">
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="py-12 text-center text-red-600">{error}</CardContent>
+      </Card>
+    </SidebarLayout>
+  );
+
+  if (!engagement) return (
+    <SidebarLayout title="Engagement Details">
+      <Card className="border-slate-200">
+        <CardContent className="py-12 text-center text-slate-600">Engagement not found</CardContent>
+      </Card>
+    </SidebarLayout>
+  );
 
   let techTagsArray: string[] = [];
   if (engagement.techTags) {
@@ -122,7 +144,6 @@ export default function EngagementDetail({ params }: { params: { id: string } })
       if (Array.isArray(engagement.techTags)) {
         techTagsArray = engagement.techTags;
       } else if (typeof engagement.techTags === 'string') {
-        // Try JSON.parse first
         try {
           const parsed = JSON.parse(engagement.techTags);
           if (Array.isArray(parsed)) {
@@ -133,7 +154,6 @@ export default function EngagementDetail({ params }: { params: { id: string } })
             techTagsArray = [];
           }
         } catch {
-          // Not JSON, treat as comma-separated string
           techTagsArray = engagement.techTags.split(',').map(t => t.trim()).filter(Boolean);
         }
       }
@@ -143,56 +163,71 @@ export default function EngagementDetail({ params }: { params: { id: string } })
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <Link href="/engagements" className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
-        ← Back to Catalog
-      </Link>
-
-      <div className="bg-white rounded-none shadow-md p-6 mb-6">
-        <h1 className="text-3xl font-bold mb-2">{engagement.name}</h1>
-        <p className="text-gray-600 mb-4">Client: <span className="font-semibold">{engagement.clientName}</span></p>
-        
-        <div className="flex gap-4 mb-4">
-          <span className={`px-3 py-1 rounded-none text-sm font-semibold ${
-            engagement.status === 'Active' ? 'bg-green-100 text-green-700' :
-            engagement.status === 'Paused' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-gray-100 text-gray-700'
-          }`}>
-            {engagement.status}
-          </span>
-          <span className="text-sm text-gray-500">
-            Updated: {new Date(engagement.updatedAt).toLocaleDateString()}
-          </span>
-        </div>
-
-        {techTagsArray.length > 0 && (
-          <div className="mb-4">
-            <p className="text-sm font-semibold text-gray-700 mb-2">Tech Tags:</p>
-            <div className="flex flex-wrap gap-2">
-              {techTagsArray.map((tag: string, idx: number) => (
-                <span key={idx} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-none text-xs">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+    <SidebarLayout
+      title={engagement.name}
+      description={`Client: ${engagement.clientName}`}
+    >
+      {/* Back Link */}
+      <div className="mb-6">
+        <Button asChild variant="outline" className="rounded-lg border-slate-300">
+          <Link href="/engagements">← Back to Catalog</Link>
+        </Button>
       </div>
 
-      <div className="bg-white rounded-none shadow-md">
-        <div className="flex border-b">
+      {/* Engagement Header Card */}
+      <Card className="mb-6 border-slate-200 shadow-sm">
+        <CardHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge
+                  className={
+                    engagement.status === 'Active'
+                      ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                      : engagement.status === 'Paused'
+                      ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-100'
+                  }
+                >
+                  {engagement.status}
+                </Badge>
+                <span className="text-sm text-slate-500">
+                  Updated: {new Date(engagement.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+
+            {techTagsArray.length > 0 && (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-700">Tech Stack:</p>
+                <div className="flex flex-wrap gap-2">
+                  {techTagsArray.map((tag: string, idx: number) => (
+                    <Badge key={idx} className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Tabs */}
+      <Card className="border-slate-200 shadow-sm">
+        <div className="flex overflow-x-auto border-b border-slate-200">
           {[
             { key: "overview", label: "Overview" },
-            { key: "signals", label: "Signals" },
+            { key: "signals", label: `Signals (${signals.length})` },
             { key: "details", label: "Details" },
           ].map(tab => (
             <Link
               key={tab.key}
               href={`/engagements/${params.id}?tab=${tab.key}`}
-              className={`flex-1 px-4 py-3 text-center font-semibold border-b-2 transition ${
+              className={`min-w-28 flex-1 px-4 py-3 text-center text-sm font-semibold transition ${
                 activeTab === tab.key
-                  ? "bg-blue-50 text-blue-600 border-blue-600"
-                  : "text-gray-600 border-transparent hover:bg-gray-50"
+                  ? "border-b-2 border-indigo-600 bg-indigo-50 text-indigo-600"
+                  : "text-slate-600 hover:bg-slate-50"
               }`}
             >
               {tab.label}
@@ -200,11 +235,11 @@ export default function EngagementDetail({ params }: { params: { id: string } })
           ))}
         </div>
 
-        <div className="p-6">
+        <CardContent className="p-6">
           {activeTab === "overview" && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Description</h3>
-              <p className="text-gray-600">
+              <h3 className="mb-4 text-lg font-semibold text-slate-900">Description</h3>
+              <p className="text-slate-600">
                 {engagement.description || "No description provided"}
               </p>
             </div>
@@ -212,27 +247,37 @@ export default function EngagementDetail({ params }: { params: { id: string } })
 
           {activeTab === "signals" && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Related Signals ({signals.length})</h3>
+              <h3 className="mb-4 text-lg font-semibold text-slate-900">
+                Related Signals ({signals.length})
+              </h3>
               {signals.length === 0 ? (
-                <p className="text-gray-600">No signals linked to this engagement yet.</p>
+                <p className="text-center text-slate-600">No signals linked to this engagement yet.</p>
               ) : (
                 <div className="space-y-4">
                   {signals.map(signal => (
-                    <div key={signal.id} className="border rounded-none p-4 hover:bg-gray-50">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-gray-800">{signal.title}</h4>
-                        <span className={`text-xs px-2 py-1 rounded-none ${
-                          signal.urgency === 'high' ? 'bg-red-100 text-red-700' :
-                          signal.urgency === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-green-100 text-green-700'
-                        }`}>
+                    <div key={signal.id} className="rounded-lg border border-slate-200 p-4 transition-colors hover:bg-slate-50">
+                      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <h4 className="break-words font-semibold text-slate-900">{signal.title}</h4>
+                        <Badge
+                          className={
+                            signal.urgency === 'high'
+                              ? 'bg-red-100 text-red-700 hover:bg-red-100'
+                              : signal.urgency === 'medium'
+                              ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                              : 'bg-green-100 text-green-700 hover:bg-green-100'
+                          }
+                        >
                           {signal.urgency}
-                        </span>
+                        </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{signal.description}</p>
-                      <p className="text-xs text-gray-500">
-                        Status: <span className="font-semibold">{signal.status}</span> • Created by: {signal.createdBy}
-                      </p>
+                      <p className="mb-3 break-words text-sm text-slate-600">{signal.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                        <span>
+                          Status: <span className="font-semibold">{signal.status}</span>
+                        </span>
+                        <span>•</span>
+                        <span>Created by: {signal.createdBy}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -241,21 +286,26 @@ export default function EngagementDetail({ params }: { params: { id: string } })
           )}
 
           {activeTab === "details" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Created At</p>
-                  <p className="font-semibold">{new Date(engagement.createdAt).toLocaleString()}</p>
+            <div>
+              <h3 className="mb-4 text-lg font-semibold text-slate-900">Details</h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-medium text-slate-700">Created At</p>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {new Date(engagement.createdAt).toLocaleString()}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Last Updated</p>
-                  <p className="font-semibold">{new Date(engagement.updatedAt).toLocaleString()}</p>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-medium text-slate-700">Last Updated</p>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {new Date(engagement.updatedAt).toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
           )}
-        </div>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+    </SidebarLayout>
   );
 }
