@@ -157,7 +157,7 @@ export default function SettingsPage() {
                 ].map(({ value, label, icon: Icon }) => (
                   <button
                     key={value}
-                    onClick={() => setTheme(value)}
+                    onClick={() => setTheme(value as "light" | "dark" | "system")}
                     className={`flex items-center gap-2 rounded-lg border p-3 text-sm transition-colors ${
                       theme === value
                         ? "border-indigo-300 bg-indigo-50 text-indigo-700"

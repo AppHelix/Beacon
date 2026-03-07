@@ -20,9 +20,9 @@ export async function GET() {
     for (const tag of techTagsData) {
       try {
         await db.insert(techTags).values(tag);
-      } catch (error) {
+      } catch (error: unknown) {
         // Ignore duplicate key errors
-        if (!error.message?.includes('duplicate key')) {
+        if (!(error instanceof Error && error.message?.includes('duplicate key'))) {
           console.error('Error inserting tech tag:', error);
         }
       }
@@ -41,9 +41,9 @@ export async function GET() {
     for (const user of usersData) {
       try {
         await db.insert(users).values(user);
-      } catch (error) {
+      } catch (error: unknown) {
         // Ignore duplicate key errors
-        if (!error.message?.includes('duplicate key')) {
+        if (!(error instanceof Error && error.message?.includes('duplicate key'))) {
           console.error('Error inserting user:', error);
         }
       }
@@ -84,9 +84,9 @@ export async function GET() {
     for (const engagement of engagementsData) {
       try {
         await db.insert(engagements).values(engagement);
-      } catch (error) {
+      } catch (error: unknown) {
         // Ignore duplicate key errors
-        if (!error.message?.includes('duplicate key')) {
+        if (!(error instanceof Error && error.message?.includes('duplicate key'))) {
           console.error('Error inserting engagement:', error);
         }
       }
@@ -154,9 +154,9 @@ export async function GET() {
     for (const signal of signalsData) {
       try {
         await db.insert(signals).values(signal);
-      } catch (error) {
+      } catch (error: unknown) {
         // Ignore duplicate key errors
-        if (!error.message?.includes('duplicate key')) {
+        if (!(error instanceof Error && error.message?.includes('duplicate key'))) {
           console.error('Error inserting signal:', error);
         }
       }
@@ -180,10 +180,10 @@ export async function GET() {
     
     return NextResponse.json(result);
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ Error inserting dummy data:', error);
     return NextResponse.json(
-      { error: 'Failed to insert dummy data', details: error.message },
+      { error: 'Failed to insert dummy data', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

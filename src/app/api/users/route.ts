@@ -19,7 +19,7 @@ export async function GET() {
     );
     
     return NextResponse.json(uniqueUsers);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching users:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       .returning();
 
     return NextResponse.json(newUser[0], { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error creating user:", error);
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }

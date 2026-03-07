@@ -12,7 +12,7 @@ export async function GET() {
   try {
     const allEngagements = await db.select().from(engagements);
     return NextResponse.json(allEngagements);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching engagements:", error);
     return NextResponse.json({ error: "Failed to fetch engagements" }, { status: 500 });
   }
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       .returning();
 
     return NextResponse.json(newEngagement[0], { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error creating engagement:", error);
     return NextResponse.json({ error: "Failed to create engagement" }, { status: 500 });
   }

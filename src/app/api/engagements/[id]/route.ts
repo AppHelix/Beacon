@@ -23,7 +23,7 @@ export async function GET(
     }
 
     return NextResponse.json(engagement);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching engagement:", error);
     return NextResponse.json({ error: "Failed to fetch engagement" }, { status: 500 });
   }
@@ -31,8 +31,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  _context: any
+  { params: _params }: { params: { id: string } }
 ): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -60,7 +59,7 @@ export async function PUT(
     }
 
     return NextResponse.json(updated[0]);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error updating engagement:", error);
     return NextResponse.json({ error: "Failed to update engagement" }, { status: 500 });
   }
@@ -77,7 +76,7 @@ export async function DELETE(
 
   try {
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error deleting engagement:", error);
     return NextResponse.json({ error: "Failed to delete engagement" }, { status: 500 });
   }
