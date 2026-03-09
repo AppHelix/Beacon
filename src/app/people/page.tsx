@@ -1,11 +1,15 @@
 "use client";
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 export const dynamic = "force-dynamic";
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SidebarLayout } from "@/components/SidebarLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface User {
   id: number;
@@ -94,12 +98,12 @@ function ClientPeopleDirectory() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">People Directory</h1>
           <p className="text-gray-300 mb-8">You need to be signed in to view the directory.</p>
-          <button
+          <Button
             onClick={() => signIn("azure-ad")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+            className="bg-indigo-600 hover:bg-indigo-700 rounded-lg"
           >
             Sign In
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -108,84 +112,105 @@ function ClientPeopleDirectory() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "Admin":
-        return "bg-red-100 text-red-700";
+        return "bg-red-100 text-red-700 hover:bg-red-100";
       case "Curator":
-        return "bg-purple-100 text-purple-700";
+        return "bg-purple-100 text-purple-700 hover:bg-purple-100";
       case "Member":
-        return "bg-blue-100 text-blue-700";
+        return "bg-blue-100 text-blue-700 hover:bg-blue-100";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-100 text-slate-700 hover:bg-slate-100";
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <Link href="/" className="text-blue-600 hover:text-blue-800 mb-6 inline-block">
-        ← Back to Home
-      </Link>
+    <SidebarLayout
+      title="People Directory"
+      description="Connect and collaborate with team members"
+    >
+      {/* Filters */}
+      <Card className="mb-6 border-slate-200 shadow-sm">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Search</label>
+              <Input
+                type="text"
+                placeholder="Search by name or email..."
+                value={searchFilter}
+                onChange={e => {
+                  setSearchFilter(e.target.value);
+                  updateQuery({ q: e.target.value || undefined });
+                }}
+                className="border-slate-300 rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Role</label>
+              <select
+                value={roleFilter}
+                onChange={e => {
+                  setRoleFilter(e.target.value);
+                  updateQuery({ role: e.target.value || undefined });
+                }}
+                className="w-full rounded-lg border border-slate-300 p-2 text-sm"
+              >
+                <option value="">All Roles</option>
+                {roles.map(role => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">People Directory</h1>
-        <p className="text-gray-600">Connect and collaborate with team members</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={searchFilter}
-          onChange={e => {
-            setSearchFilter(e.target.value);
-            updateQuery({ q: e.target.value || undefined });
-          }}
-          className="p-2 border rounded-none"
-        />
-        <select
-          value={roleFilter}
-          onChange={e => {
-            setRoleFilter(e.target.value);
-            updateQuery({ role: e.target.value || undefined });
-          }}
-          className="p-2 border rounded-none"
-        >
-          <option value="">All Roles</option>
-          {roles.map(role => (
-            <option key={role} value={role}>
-              {role}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {isLoading && <p className="text-gray-600">Loading people directory...</p>}
+      {isLoading && <p className="text-slate-600">Loading people directory...</p>}
 
       {!isLoading && filteredUsers.length === 0 && (
-        <p className="text-gray-600">No people found.</p>
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="py-12 text-center">
+            <p className="text-slate-600">No people found.</p>
+          </CardContent>
+        </Card>
       )}
 
+      {/* People Cards */}
       {!isLoading && filteredUsers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredUsers.map(user => (
-            <div key={user.id} className="bg-white rounded-none shadow-md p-6 hover:shadow-lg">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800">{user.name}</h3>
-                  <p className="text-sm text-gray-600">{user.email}</p>
+            <Card key={user.id} className="border-slate-200 shadow-sm transition-all hover:shadow-md">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="break-words text-lg font-semibold text-slate-900">
+                      {user.name}
+                    </CardTitle>
+                    <CardDescription className="break-all text-sm">
+                      {user.email}
+                    </CardDescription>
+                  </div>
+                  <Badge className={getRoleBadgeColor(user.role)}>
+                    {user.role}
+                  </Badge>
                 </div>
-              </div>
-              <div className="mb-4">
-                <span className={`text-xs px-3 py-1 rounded-none font-semibold ${getRoleBadgeColor(user.role)}`}>
-                  {user.role}
-                </span>
-              </div>
-              <Link href={`/people?q=${encodeURIComponent(user.name)}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-none inline-block text-center">
-                View Profile
-              </Link>
-            </div>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  asChild
+                  className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Link href={`/people?q=${encodeURIComponent(user.name)}`}>
+                    View Profile
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
-    </div>
+    </SidebarLayout>
   );
 }
 

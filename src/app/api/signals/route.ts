@@ -13,7 +13,7 @@ export async function GET() {
   try {
     const allSignals = await db.select().from(signals);
     return NextResponse.json(allSignals);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching signals:', error);
     return NextResponse.json({ error: 'Failed to fetch signals' }, { status: 500 });
   }
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       .returning();
 
     return NextResponse.json(newSignal[0], { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating signal:', error);
     return NextResponse.json({ error: 'Failed to create signal' }, { status: 500 });
   }
@@ -90,7 +90,7 @@ export async function PUT(request: Request) {
     }
 
     return NextResponse.json(updated[0]);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating signal:', error);
     return NextResponse.json({ error: 'Failed to update signal' }, { status: 500 });
   }
@@ -117,7 +117,7 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting signal:', error);
     return NextResponse.json({ error: 'Failed to delete signal' }, { status: 500 });
   }

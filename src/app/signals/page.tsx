@@ -2,8 +2,12 @@
 export const dynamic = "force-dynamic";
 import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession, signIn } from "next-auth/react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { SidebarLayout } from "@/components/SidebarLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Signal {
   id: number;
@@ -17,6 +21,9 @@ interface Signal {
   createdAt: string;
   updatedAt: string;
 }
+
+const normalize = (value: string) => value.trim().toLowerCase();
+const urgencyOrder = ["low", "medium", "high"] as const;
 
 const fetchSignals = async (): Promise<Signal[]> => {
   try {
@@ -71,7 +78,7 @@ function SignalBoardContent() {
   const filteredSignals = useMemo(() => {
     return signals.filter(signal => {
       const matchesStatus = !statusFilter || signal.status === statusFilter;
-      const matchesUrgency = !urgencyFilter || signal.urgency === urgencyFilter;
+      const matchesUrgency = !urgencyFilter || normalize(signal.urgency) === normalize(urgencyFilter);
       const matchesSearch =
         !search ||
         signal.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -81,7 +88,7 @@ function SignalBoardContent() {
   }, [signals, statusFilter, urgencyFilter, search]);
 
   const statusOptions = Array.from(new Set(signals.map(s => s.status)));
-  const urgencyOptions = ["low", "medium", "high"];
+  const urgencyOptions = urgencyOrder;
 
   if (status === "loading") {
     return (
@@ -97,12 +104,12 @@ function SignalBoardContent() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-4">Signal Board</h1>
           <p className="text-gray-300 mb-8">You need to be signed in to view signals.</p>
-          <button
+          <Button
             onClick={() => signIn("azure-ad")}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
+            className="bg-indigo-600 hover:bg-indigo-700 rounded-lg"
           >
             Sign In
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -111,112 +118,125 @@ function SignalBoardContent() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "resolved":
-        return "bg-green-100 text-green-700";
+        return "bg-green-100 text-green-700 hover:bg-green-100";
       case "in-progress":
-        return "bg-blue-100 text-blue-700";
+        return "bg-blue-100 text-blue-700 hover:bg-blue-100";
       case "closed":
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-100 text-slate-700 hover:bg-slate-100";
       default:
-        return "bg-yellow-100 text-yellow-700";
+        return "bg-yellow-100 text-yellow-700 hover:bg-yellow-100";
     }
   };
 
   const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
+    switch (normalize(urgency)) {
       case "high":
-        return "bg-red-100 text-red-700";
+        return "bg-red-100 text-red-700 hover:bg-red-100";
       case "medium":
-        return "bg-yellow-100 text-yellow-700";
+        return "bg-yellow-100 text-yellow-700 hover:bg-yellow-100";
       default:
-        return "bg-green-100 text-green-700";
+        return "bg-green-100 text-green-700 hover:bg-green-100";
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <Link href="/" className="text-blue-600 hover:text-blue-800 mb-6 inline-block">
-        ← Back to Home
-      </Link>
+    <SidebarLayout
+      title="Signals"
+      description="Track and collaborate on project signals and issues"
+    >
+      {/* Filters */}
+      <Card className="mb-6 border-slate-200 shadow-sm">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Search</label>
+              <Input
+                value={search}
+                onChange={e => {
+                  setSearch(e.target.value);
+                  updateQuery({ q: e.target.value || undefined });
+                }}
+                placeholder="Search title or description..."
+                className="border-slate-300 rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Status</label>
+              <select
+                value={statusFilter}
+                onChange={e => {
+                  setStatusFilter(e.target.value);
+                  updateQuery({ status: e.target.value || undefined });
+                }}
+                className="w-full rounded-lg border border-slate-300 p-2 text-sm"
+              >
+                <option value="">All Status</option>
+                {statusOptions.map(status => (
+                  <option key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Urgency</label>
+              <select
+                value={urgencyFilter}
+                onChange={e => {
+                  setUrgencyFilter(e.target.value);
+                  updateQuery({ urgency: e.target.value || undefined });
+                }}
+                className="w-full rounded-lg border border-slate-300 p-2 text-sm"
+              >
+                <option value="">All Urgency</option>
+                {urgencyOptions.map(urgency => (
+                  <option key={urgency} value={urgency}>
+                    {urgency.charAt(0).toUpperCase() + urgency.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Signal Board</h1>
-        <p className="text-gray-600">Track and collaborate on project signals and issues</p>
-      </div>
+      {/* Signals List */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-0">
+          {isLoading && <p className="p-6 text-slate-600">Loading signals...</p>}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <input
-          value={search}
-          onChange={e => {
-            setSearch(e.target.value);
-            updateQuery({ q: e.target.value || undefined });
-          }}
-          placeholder="Search title or description..."
-          className="p-2 border rounded-none"
-        />
-        <select
-          value={statusFilter}
-          onChange={e => {
-            setStatusFilter(e.target.value);
-            updateQuery({ status: e.target.value || undefined });
-          }}
-          className="p-2 border rounded-none"
-        >
-          <option value="">All Status</option>
-          {statusOptions.map(status => (
-            <option key={status} value={status}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </option>
-          ))}
-        </select>
-        <select
-          value={urgencyFilter}
-          onChange={e => {
-            setUrgencyFilter(e.target.value);
-            updateQuery({ urgency: e.target.value || undefined });
-          }}
-          className="p-2 border rounded-none"
-        >
-          <option value="">All Urgency</option>
-          {urgencyOptions.map(urgency => (
-            <option key={urgency} value={urgency}>
-              {urgency.charAt(0).toUpperCase() + urgency.slice(1)}
-            </option>
-          ))}
-        </select>
-      </div>
+          {!isLoading && filteredSignals.length === 0 && (
+            <p className="p-6 text-center text-slate-600">No signals found.</p>
+          )}
 
-      <div className="bg-white rounded-none shadow-md">
-        {isLoading && <p className="p-6 text-gray-600">Loading signals...</p>}
-
-        {!isLoading && filteredSignals.length === 0 && (
-          <p className="p-6 text-gray-600">No signals found.</p>
-        )}
-
-        {!isLoading && filteredSignals.length > 0 && (
-          <div className="divide-y">
-            {filteredSignals.map(signal => (
-              <div key={signal.id} className="p-4 hover:bg-gray-50 cursor-pointer">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold text-gray-800">{signal.title}</h3>
-                  <div className="flex gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-none ${getStatusColor(signal.status)}`}>
-                      {signal.status.toUpperCase()}
-                    </span>
-                    <span className={`text-xs px-2 py-1 rounded-none ${getUrgencyColor(signal.urgency)}`}>
-                      {signal.urgency}
-                    </span>
+          {!isLoading && filteredSignals.length > 0 && (
+            <div className="divide-y divide-slate-200">
+              {filteredSignals.map(signal => (
+                <div key={signal.id} className="p-4 transition-colors hover:bg-slate-50">
+                  <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <h3 className="break-words text-lg font-semibold text-slate-900">{signal.title}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className={getStatusColor(signal.status)}>
+                        {signal.status.toUpperCase()}
+                      </Badge>
+                      <Badge className={getUrgencyColor(signal.urgency)}>
+                        {signal.urgency}
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="mb-3 break-words text-sm text-slate-600">{signal.description}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span className="font-medium">Created by: {signal.createdBy}</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Engagement ID: {signal.engagementId}</span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{signal.description}</p>
-                <p className="text-xs text-gray-500">
-                  Created by: {signal.createdBy} • Engagement: {signal.engagementId}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </SidebarLayout>
   );
 }
 

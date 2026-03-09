@@ -12,8 +12,14 @@ export async function GET() {
 
   try {
     const allUsers = await db.select().from(users);
-    return NextResponse.json(allUsers);
-  } catch (error) {
+    
+    // Remove duplicates based on email (client-side deduplication until DB is fixed)
+    const uniqueUsers = allUsers.filter((user, index, self) => 
+      index === self.findIndex(u => u.email === user.email)
+    );
+    
+    return NextResponse.json(uniqueUsers);
+  } catch (error: unknown) {
     console.error("Error fetching users:", error);
     return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
   }
@@ -46,7 +52,7 @@ export async function POST(req: Request) {
       .returning();
 
     return NextResponse.json(newUser[0], { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error creating user:", error);
     return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
