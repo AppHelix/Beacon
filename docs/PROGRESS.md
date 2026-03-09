@@ -38,12 +38,11 @@
 ## Phase 04 (Week 4) — Signals Creation + Lifecycle Start
 
 - [x] Implement Signal entity and full create/read/update APIs.
-- [-] Add Signal creation UX from both global board and engagement context.
-- [-] Implement initial statuses (`Open`, `In Progress`, `Resolved`, `Closed`).
-- [ ] Add Signal Detail page with problem statement and metadata.
-- [ ] Week 4 exit check: users can create and track Signals end to end.
+- [x] Add Signal creation UX from both global board and engagement context.
+- [x] Implement initial statuses (`Open`, `In Progress`, `Resolved`, `Closed`).
+- [x] Add Signal Detail page with problem statement and metadata.
+- [x] Week 4 exit check: users can create and track Signals end to end.
 
- [x] Week 03: Baseline query indexes in place and validated.
 ## Phase 05 (Week 5) — Collaboration Workflows
 
 - [-] Implement Signal Board list + Kanban views with filter/sort.

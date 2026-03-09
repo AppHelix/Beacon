@@ -5,6 +5,7 @@ import { useSession, signIn } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SidebarLayout } from "@/components/SidebarLayout";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,6 +38,10 @@ const fetchSignals = async (): Promise<Signal[]> => {
 };
 
 function SignalBoardContent() {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ title: "", description: "", engagementId: "", urgency: "medium", requiredSkills: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -144,7 +149,85 @@ function SignalBoardContent() {
       title="Signals"
       description="Track and collaborate on project signals and issues"
     >
-      {/* Filters */}
+      {/* Create Signal Modal */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button className="mb-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create Signal</Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="max-w-md">
+          <SheetHeader>
+            <SheetTitle>Create Signal</SheetTitle>
+          </SheetHeader>
+          <form
+            onSubmit={async e => {
+              e.preventDefault();
+              setSubmitting(true);
+              setError("");
+              try {
+                const res = await fetch("/api/signals", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ ...form, engagementId: Number(form.engagementId), createdBy: session?.user?.name || "" })
+                });
+                if (!res.ok) {
+                  const data = await res.json();
+                  setError(data.error || "Failed to create signal");
+                } else {
+                  setOpen(false);
+                  setForm({ title: "", description: "", engagementId: "", urgency: "medium", requiredSkills: "" });
+                  fetchSignals().then(setSignals);
+                }
+              } catch (err) {
+                setError("Failed to create signal");
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+            className="space-y-4 mt-4"
+          >
+            <Input
+              required
+              placeholder="Title"
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            />
+            <Input
+              required
+              placeholder="Description"
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+            />
+            <Input
+              required
+              placeholder="Engagement ID"
+              value={form.engagementId}
+              onChange={e => setForm(f => ({ ...f, engagementId: e.target.value }))}
+              type="number"
+            />
+            <select
+              value={form.urgency}
+              onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 p-2 text-sm"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+            <Input
+              placeholder="Required Skills (comma separated)"
+              value={form.requiredSkills}
+              onChange={e => setForm(f => ({ ...f, requiredSkills: e.target.value }))}
+            />
+            {error && <div className="text-red-600 text-sm">{error}</div>}
+            <SheetFooter>
+              <Button type="submit" disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create</Button>
+              <SheetClose asChild>
+                <Button variant="outline" type="button">Cancel</Button>
+              </SheetClose>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
       <Card className="mb-6 border-slate-200 shadow-sm">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -214,14 +297,35 @@ function SignalBoardContent() {
               {filteredSignals.map(signal => (
                 <div key={signal.id} className="p-4 transition-colors hover:bg-slate-50">
                   <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <h3 className="break-words text-lg font-semibold text-slate-900">{signal.title}</h3>
-                    <div className="flex flex-wrap gap-2">
+                    <a href={`/signals/${signal.id}`} className="break-words text-lg font-semibold text-indigo-700 hover:underline">
+                      {signal.title}
+                    </a>
+                    <div className="flex flex-wrap gap-2 items-center">
                       <Badge className={getStatusColor(signal.status)}>
                         {signal.status.toUpperCase()}
                       </Badge>
                       <Badge className={getUrgencyColor(signal.urgency)}>
                         {signal.urgency}
                       </Badge>
+                      <select
+                        value={signal.status}
+                        onChange={async e => {
+                          // Normalize status value to lowercase and hyphenated
+                          const newStatus = e.target.value.toLowerCase().replace(/ /g, "-");
+                          await fetch("/api/signals", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ id: Number(signal.id), status: newStatus })
+                          });
+                          fetchSignals().then(setSignals);
+                        }}
+                        className="ml-2 rounded border border-slate-300 p-1 text-xs"
+                      >
+                        <option value="open">Open</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                      </select>
                     </div>
                   </div>
                   <p className="mb-3 break-words text-sm text-slate-600">{signal.description}</p>
