@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/client';
 import { signals } from '../../../db/schema';
+import { eq } from 'drizzle-orm/expressions';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../lib/auth';
 
@@ -68,6 +69,8 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json();
     const { id, title, description, status, urgency, requiredSkills } = body;
+    console.log('PUT /api/signals body:', body);
+    console.log('PUT /api/signals id:', id, 'type:', typeof id);
 
     if (!id) {
       return NextResponse.json({ error: 'Missing signal id' }, { status: 400 });
@@ -83,6 +86,7 @@ export async function PUT(request: Request) {
         ...(requiredSkills !== undefined && { requiredSkills: JSON.stringify(requiredSkills) }),
         updatedAt: new Date().toISOString(),
       })
+      .where(eq(signals.id, Number(id)))
       .returning();
 
     if (!updated || updated.length === 0) {
@@ -91,8 +95,12 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updated[0]);
   } catch (error: unknown) {
-    console.error('Error updating signal:', error);
-    return NextResponse.json({ error: 'Failed to update signal' }, { status: 500 });
+    if (error instanceof Error) {
+      console.error('Error updating signal:', error.message, error.stack);
+    } else {
+      console.error('Error updating signal:', error);
+    }
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to update signal' }, { status: 500 });
   }
 }
 

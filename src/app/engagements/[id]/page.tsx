@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { SidebarLayout } from "@/components/SidebarLayout";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -59,8 +61,11 @@ export default function EngagementDetail({ params }: { params: { id: string } })
   const searchParams = useSearchParams();
   const [engagement, setEngagement] = useState<Engagement | null>(null);
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ title: "", description: "", urgency: "medium", requiredSkills: "" });
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const activeTab = (() => {
     const tab = (searchParams?.get("tab") ?? "overview").toLowerCase();
@@ -247,41 +252,116 @@ export default function EngagementDetail({ params }: { params: { id: string } })
 
           {activeTab === "signals" && (
             <div>
-              <h3 className="mb-4 text-lg font-semibold text-slate-900">
-                Related Signals ({signals.length})
-              </h3>
-              {signals.length === 0 ? (
-                <p className="text-center text-slate-600">No signals linked to this engagement yet.</p>
-              ) : (
-                <div className="space-y-4">
-                  {signals.map(signal => (
-                    <div key={signal.id} className="rounded-lg border border-slate-200 p-4 transition-colors hover:bg-slate-50">
-                      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <h4 className="break-words font-semibold text-slate-900">{signal.title}</h4>
-                        <Badge
-                          className={
-                            signal.urgency === 'high'
-                              ? 'bg-red-100 text-red-700 hover:bg-red-100'
-                              : signal.urgency === 'medium'
-                              ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
-                              : 'bg-green-100 text-green-700 hover:bg-green-100'
-                          }
-                        >
-                          {signal.urgency}
-                        </Badge>
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button className="mb-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create Signal</Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="max-w-md">
+                  <SheetHeader>
+                    <SheetTitle>Create Signal</SheetTitle>
+                  </SheetHeader>
+                  <form
+                    onSubmit={async e => {
+                      e.preventDefault();
+                      setSubmitting(true);
+                      setError("");
+                      try {
+                        const res = await fetch("/api/signals", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ ...form, engagementId: engagement.id, createdBy: session?.user?.name || "" })
+                        });
+                        if (!res.ok) {
+                          const data = await res.json();
+                          setError(data.error || "Failed to create signal");
+                        } else {
+                          setOpen(false);
+                          setForm({ title: "", description: "", urgency: "medium", requiredSkills: "" });
+                          fetchSignals().then(data => setSignals(data.filter(s => s.engagementId === engagement.id)));
+                        }
+                      } catch (_err) {
+                        setError("Failed to create signal");
+                      } finally {
+                        setSubmitting(false);
+                      }
+                    }}
+                    className="space-y-4 mt-4"
+                  >
+                    <Input
+                      required
+                      placeholder="Title"
+                      value={form.title}
+                      onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    />
+                    <Input
+                      required
+                      placeholder="Description"
+                      value={form.description}
+                      onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    />
+                    <select
+                      value={form.urgency}
+                      onChange={e => setForm(f => ({ ...f, urgency: e.target.value }))}
+                      className="w-full rounded-lg border border-slate-300 p-2 text-sm"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                    <Input
+                      placeholder="Required Skills (comma separated)"
+                      value={form.requiredSkills}
+                      onChange={e => setForm(f => ({ ...f, requiredSkills: e.target.value }))}
+                    />
+                    {error && <div className="text-red-600 text-sm">{error}</div>}
+                    <SheetFooter>
+                      <Button type="submit" disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create</Button>
+                      <SheetClose asChild>
+                        <Button variant="outline" type="button">Cancel</Button>
+                      </SheetClose>
+                    </SheetFooter>
+                  </form>
+                </SheetContent>
+              </Sheet>
+              <div>
+                <h3 className="mb-4 text-lg font-semibold text-slate-900">
+                  Related Signals ({signals.length})
+                </h3>
+                {signals.length === 0 ? (
+                  <p className="text-center text-slate-600">No signals linked to this engagement yet.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {signals.map(signal => (
+                      <div key={signal.id} className="rounded-lg border border-slate-200 p-4 transition-colors hover:bg-slate-50">
+                        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <a href={`/signals/${signal.id}`} className="break-words font-semibold text-indigo-700 hover:underline">
+                            {signal.title}
+                          </a>
+                          <Badge
+                            className={
+                              signal.urgency === 'high'
+                                ? 'bg-red-100 text-red-700 hover:bg-red-100'
+                                : signal.urgency === 'medium'
+                                ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                                : 'bg-green-100 text-green-700 hover:bg-green-100'
+                            }
+                          >
+                            {signal.urgency}
+                          </Badge>
+                        </div>
+                        <p className="mb-3 break-words text-sm text-slate-600">{signal.description}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          <span>
+                            Status: <span className="font-semibold">{signal.status}</span>
+                          </span>
+                          <span>•</span>
+                          <span>Created by: {signal.createdBy}</span>
+                        </div>
                       </div>
-                      <p className="mb-3 break-words text-sm text-slate-600">{signal.description}</p>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span>
-                          Status: <span className="font-semibold">{signal.status}</span>
-                        </span>
-                        <span>•</span>
-                        <span>Created by: {signal.createdBy}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
