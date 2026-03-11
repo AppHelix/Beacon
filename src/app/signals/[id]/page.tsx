@@ -34,7 +34,7 @@ export default function SignalDetailPage() {
         if (!res.ok) throw new Error("Failed to fetch signal");
         const data = await res.json();
         setSignal(data);
-      } catch (err) {
+      } catch (_err) {
         setError("Failed to load signal");
       } finally {
         setLoading(false);

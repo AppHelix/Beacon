@@ -177,7 +177,7 @@ function SignalBoardContent() {
                   setForm({ title: "", description: "", engagementId: "", urgency: "medium", requiredSkills: "" });
                   fetchSignals().then(setSignals);
                 }
-              } catch (err) {
+              } catch (_err) {
                 setError("Failed to create signal");
               } finally {
                 setSubmitting(false);

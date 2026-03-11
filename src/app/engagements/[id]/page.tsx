@@ -279,7 +279,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
                           setForm({ title: "", description: "", urgency: "medium", requiredSkills: "" });
                           fetchSignals().then(data => setSignals(data.filter(s => s.engagementId === engagement.id)));
                         }
-                      } catch (err) {
+                      } catch (_err) {
                         setError("Failed to create signal");
                       } finally {
                         setSubmitting(false);
