@@ -45,11 +45,11 @@
 
 ## Phase 05 (Week 5) — Collaboration Workflows
 
-- [-] Implement Signal Board list + Kanban views with filter/sort.
-- [ ] Add hand-raise workflow and suggestion responses.
-- [ ] Add resolution summary capture on `Resolved` transition.
-- [ ] Add in-app notifications for Signal responses and hand-raises.
-- [ ] Week 5 exit check: seeker/contributor loop works without manual DB edits.
+- [x] Implement Signal Board list + Kanban views with filter/sort.
+- [x] Add hand-raise workflow and suggestion responses.
+- [x] Add resolution summary capture on `Resolved` transition.
+- [x] Add in-app notifications for Signal responses and hand-raises.
+- [x] Week 5 exit check: seeker/contributor loop works without manual DB edits.
 
 ## Phase 06 (Week 6) — People + RBAC Hardening
 
