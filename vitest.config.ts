@@ -5,5 +5,10 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: "./vitest.setup.ts",
+    include: ["tests/**/*.test.ts", "tests/**/*.test.mts"],
+  },
+  esbuild: {
+    target: "esnext",
+    format: "esm",
   },
 });

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/client';
 import { signals } from '../../../db/schema';
-import { eq } from 'drizzle-orm/expressions';
+import { eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../lib/auth';
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, description, engagementId, createdBy, status, urgency, requiredSkills } = body;
+    const { title, description, engagementId, createdBy, status, urgency, requiredSkills, resolutionSummary } = body;
 
     if (!title || !description || !engagementId || !createdBy) {
       return NextResponse.json(
@@ -48,6 +48,7 @@ export async function POST(request: Request) {
         status: status || 'open',
         urgency: urgency || 'medium',
         requiredSkills: requiredSkills ? JSON.stringify(requiredSkills) : null,
+        resolutionSummary: resolutionSummary || null,
         createdAt: now,
         updatedAt: now,
       })
@@ -68,7 +69,7 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const { id, title, description, status, urgency, requiredSkills } = body;
+    const { id, title, description, status, urgency, requiredSkills, resolutionSummary } = body;
     console.log('PUT /api/signals body:', body);
     console.log('PUT /api/signals id:', id, 'type:', typeof id);
 
@@ -84,6 +85,7 @@ export async function PUT(request: Request) {
         ...(status !== undefined && { status }),
         ...(urgency !== undefined && { urgency }),
         ...(requiredSkills !== undefined && { requiredSkills: JSON.stringify(requiredSkills) }),
+        ...(resolutionSummary !== undefined && { resolutionSummary }),
         updatedAt: new Date().toISOString(),
       })
       .where(eq(signals.id, Number(id)))
