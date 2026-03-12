@@ -13,6 +13,7 @@ export const signalHandRaises = pgTable('signal_hand_raises', {
   userName: varchar('user_name', { length: 255 }).notNull(),
   createdAt: text('created_at').notNull(),
 });
+
 import { pgTable, serial, text, varchar, integer } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
