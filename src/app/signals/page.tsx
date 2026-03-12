@@ -8,7 +8,6 @@ import { useSession, signIn } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SidebarLayout } from "@/components/SidebarLayout";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,27 +17,6 @@ import HandRaise from "@/features/HandRaise";
 export const dynamic = "force-dynamic";
 
 // Simple toast system
-function Toast({ message, type, onClose }: { message: string; type?: 'success' | 'error'; onClose: () => void }) {
-  return (
-    <div
-      className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-lg shadow-lg font-semibold text-base flex items-center gap-2 transition-all animate-fade-in-down ${
-        type === 'error'
-          ? 'bg-red-600 text-white'
-          : 'bg-green-600 text-white'
-      }`}
-      role="alert"
-      onClick={onClose}
-      style={{ cursor: 'pointer', minWidth: 220 }}
-    >
-      {type === 'error' ? (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-      ) : (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-      )}
-      <span>{message}</span>
-    </div>
-  );
-}
 
 export default function SignalBoard() {
   return (
@@ -53,8 +31,6 @@ export default function SignalBoard() {
     </Suspense>
   );
 }
-
-
 
 interface Signal {
   id: number;
@@ -114,11 +90,11 @@ function SignalBoardContent() {
       if (open) {
         fetch("/api/engagements")
           .then(res => res.ok ? res.json() : [])
-          .then(data => setEngagements(data.map((e: any) => ({ id: e.id, name: e.name }))))
+            .then(data => setEngagements(data.map((e: { id: number; name: string }) => ({ id: e.id, name: e.name }))))
           .catch(() => setEngagements([]));
       }
     }, [open]);
-  const [form, setForm] = useState({ title: "", description: "", engagementId: "", urgency: "medium", requiredSkills: "" });
+  const [form, setForm] = useState<{ title: string; description: string; engagementId: string; urgency: string; requiredSkills: string }>({ title: "", description: "", engagementId: "", urgency: "medium", requiredSkills: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -127,10 +103,10 @@ function SignalBoardContent() {
   const currentPath = pathname ?? "/signals";
   const getParam = (key: string) => searchParams?.get(key) ?? "";
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [statusFilter, setStatusFilter] = useState(getParam("status"));
-  const [urgencyFilter, setUrgencyFilter] = useState(getParam("urgency"));
-  const [search, setSearch] = useState(getParam("q"));
-  const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>(getParam("status"));
+  const [urgencyFilter, setUrgencyFilter] = useState<string>(getParam("urgency"));
+  const [search, setSearch] = useState<string>(getParam("q"));
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const updateQuery = (updates: Record<string, string | undefined>) => {
     const params = new URLSearchParams(searchParams?.toString() ?? "");
@@ -152,7 +128,7 @@ function SignalBoardContent() {
         setSignals(signals.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         // Fetch hand-raises for each signal
         const handRaiseMap: Record<number, { userEmail: string; userName: string }[]> = {};
-        await Promise.all(signals.map(async (signal: any) => {
+          await Promise.all(signals.map(async (signal: Signal) => {
           const res = await fetch(`/api/signals/${signal.id}/hand-raise`);
           if (res.ok) {
             handRaiseMap[signal.id] = await res.json();
@@ -171,7 +147,7 @@ function SignalBoardContent() {
     setSearch(searchParams?.get("q") ?? "");
   }, [searchParams]);
 
-  const filteredSignals = useMemo(() => {
+  const filteredSignals = useMemo<Signal[]>(() => {
     let arr = signals.filter(signal => {
       const matchesStatus = !statusFilter || signal.status === statusFilter;
       const matchesUrgency = !urgencyFilter || normalize(signal.urgency) === normalize(urgencyFilter);
@@ -197,7 +173,7 @@ function SignalBoardContent() {
     return arr;
   }, [signals, statusFilter, urgencyFilter, search, sortBy]);
   // Enhanced status change handler to support resolution summary
-  const handleStatusChange = async (id: number, newStatus: string, signal?: Signal) => {
+  const handleStatusChange = async (id: number, newStatus: string, _signal?: Signal) => {
     if (newStatus === "resolved") {
       setPendingSignalId(id);
       setShowSummaryDialog(true);
@@ -233,7 +209,7 @@ function SignalBoardContent() {
       setResolutionSummary("");
       fetchSignals().then(signals => setSignals(signals.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())));
       addNotification("Signal marked as resolved.", "success");
-    } catch (err) {
+    } catch {
       setSummaryError("Failed to submit summary.");
     } finally {
       setSummarySubmitting(false);
@@ -302,7 +278,7 @@ function SignalBoardContent() {
           <Button variant={kanban ? "outline" : "default"} onClick={() => setKanban(false)}>List View</Button>
           <Button variant={kanban ? "default" : "outline"} onClick={() => setKanban(true)}>Kanban View</Button>
           <label className="text-sm">Sort by:
-            <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="ml-2 border rounded p-1">
+            <select value={sortBy} onChange={e => setSortBy(e.target.value as 'createdAt' | 'urgency' | 'title')} className="ml-2 border rounded p-1">
               <option value="createdAt">Created At</option>
               <option value="urgency">Urgency</option>
               <option value="title">Title</option>
@@ -336,7 +312,7 @@ function SignalBoardContent() {
                         setForm({ title: "", description: "", engagementId: "", urgency: "medium", requiredSkills: "" });
                         fetchSignals().then(signals => setSignals(signals.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())));
                       }
-                    } catch (_err) {
+                    } catch {
                       setError("Failed to create signal");
                     } finally {
                       setSubmitting(false);
@@ -531,7 +507,7 @@ function SignalBoardContent() {
                               style={{ maxWidth: 400 }}
                             >
                               <svg className="w-6 h-6 flex-shrink-0 text-yellow-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 11V7a5 5 0 1110 0v4m-1 4v2a3 3 0 11-6 0v-2m-4 0h14" /></svg>
-                              <span className="text-base">You've already raised your hand for this signal</span>
+                              <span className="text-base">You&apos;ve already raised your hand for this signal</span>
                             </div>
                           )}
                         </div>
@@ -698,7 +674,7 @@ function SignalBoardContent() {
           <DialogFooter>
             <Button onClick={handleSubmitSummary} disabled={summarySubmitting} className="bg-green-600 hover:bg-green-700 rounded-lg">Submit</Button>
             <DialogClose asChild>
-              <Button variant="outline" type="button" onClick={() => setShowSummaryDialog(false)}>Cancel</Button>
+              <Button variant="outline" type="button" onClick={() => setShowSummaryDialog(false)}>&apos;Cancel&apos;</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>

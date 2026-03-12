@@ -41,14 +41,19 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
     const now = new Date().toISOString();
     // Prevent duplicate hand-raises by same user for same signal
-    let existing = [];
+    let existing: unknown[] = [];
     try {
       existing = await db
         .select()
         .from(signalHandRaises)
         .where(sql`${signalHandRaises.signalId} = ${signalId} AND ${signalHandRaises.userEmail} = ${userEmail}`);
-    } catch (dbErr) {
-      const errorMsg = typeof dbErr === 'object' && dbErr && 'message' in dbErr ? (dbErr as any).message : String(dbErr);
+    } catch (dbErr: unknown) {
+      let errorMsg = 'Unknown error';
+      if (typeof dbErr === 'object' && dbErr && 'message' in dbErr) {
+        errorMsg = (dbErr as { message: string }).message;
+      } else {
+        errorMsg = String(dbErr);
+      }
       console.error('Hand-raise POST error: DB select failed', dbErr, {
         signalId,
         userEmail,
