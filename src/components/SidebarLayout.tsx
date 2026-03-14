@@ -51,7 +51,7 @@ export function SidebarLayout({ children, title, description }: SidebarLayoutPro
     : "U";
 
   // Check user role for navigation visibility
-  const userRole = (session?.user as any)?.role?.toLowerCase();
+  const userRole = session?.user?.role?.toLowerCase();
   const canAccessAdmin = userRole === "admin" || userRole === "curator";
 
   return (

@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   }
 
   // Check if user has admin or curator role
-  const userRole = (session.user as any)?.role?.toLowerCase();
+  const userRole = session.user?.role?.toLowerCase();
   const hasAdminAccess = userRole === "admin" || userRole === "curator";
 
   if (!hasAdminAccess) {

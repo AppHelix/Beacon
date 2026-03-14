@@ -68,7 +68,7 @@ function SignalBoardContent() {
   const { data: session, status } = useSession();
   
   // Get user role for RBAC
-  const userRole = (session?.user as any)?.role?.toLowerCase();
+  const userRole = session?.user?.role?.toLowerCase();
   const canCreateSignal = userRole === 'admin' || userRole === 'curator' || userRole === 'member';
   
   const [kanban, setKanban] = useState(false);

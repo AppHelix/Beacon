@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   // RBAC: Only Admin, Curator, and Member can create signals
-  const userRole = (session.user as any)?.role?.toLowerCase();
+  const userRole = session.user?.role?.toLowerCase();
   if (userRole === 'viewer') {
     return NextResponse.json({ error: 'Forbidden: Viewers cannot create signals' }, { status: 403 });
   }

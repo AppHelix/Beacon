@@ -23,7 +23,7 @@ export default function Home() {
   const { data: session, status } = useSession();
 
   // Get user role for RBAC
-  const userRole = (session?.user as any)?.role?.toLowerCase();
+  const userRole = session?.user?.role?.toLowerCase();
   const canAccessAdmin = userRole === 'admin' || userRole === 'curator';
 
   const quickActions = [

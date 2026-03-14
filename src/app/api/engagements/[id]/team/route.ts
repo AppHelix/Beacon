@@ -26,8 +26,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 // POST: Add a team member
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  const userRole = session && session.user ? (session.user as any).role : undefined;
-  if (!session || !session.user || !["admin", "curator"].includes(userRole?.toLowerCase())) {
+  const userRole = session?.user?.role;
+  if (!session || !session.user || !userRole || !["admin", "curator"].includes(userRole.toLowerCase())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const engagementId = Number(params.id);
@@ -45,8 +45,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 // DELETE: Remove a team member
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  const userRole = session && session.user ? (session.user as any).role : undefined;
-  if (!session || !session.user || !["admin", "curator"].includes(userRole?.toLowerCase())) {
+  const userRole = session?.user?.role;
+  if (!session || !session.user || !userRole || !["admin", "curator"].includes(userRole.toLowerCase())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const engagementId = Number(params.id);

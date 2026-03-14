@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
         // Update lastSignIn on every login
-        async signIn({ user }: any) {
+        async signIn({ user }) {
           try {
             const { db } = await import('@/db/client');
             const { users } = await import('@/db/schema');
@@ -43,8 +43,7 @@ export const authOptions: NextAuthOptions = {
           }
           return true;
         },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user, profile }: any) {
+    async jwt({ token, user, profile }) {
       // Debug: log the user and profile
       // Remove/comment this in production
       // eslint-disable-next-line no-console
@@ -57,8 +56,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       // Debug: log the token and session
       // Remove/comment this in production
       // eslint-disable-next-line no-console

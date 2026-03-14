@@ -45,7 +45,7 @@ interface Signal {
 
 function TeamMembers({ engagementId }: { engagementId: number }) {
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role?.toLowerCase();
+  const userRole = session?.user?.role?.toLowerCase();
   const canManageTeam = userRole === "admin" || userRole === "curator";
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [users, setUsers] = useState<{ id: number; name: string; email: string }[]>([]);
