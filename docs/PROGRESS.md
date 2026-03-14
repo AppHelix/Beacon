@@ -54,10 +54,10 @@
 ## Phase 06 (Week 6) — People + RBAC Hardening
 
 - [x] Build People Directory with search and skill filtering.
-- [ ] Add team membership management on engagement profiles.
-- [ ] Enforce RBAC roles across UI + API (Admin, Curator, Member, Viewer).
-- [ ] Expand Playwright coverage for full Signal lifecycle and role-sensitive flows.
-- [ ] Week 6 exit check: Collaboration Engine phase meets access and workflow goals.
+- [x] Add team membership management on engagement profiles.
+- [x] Enforce RBAC roles across UI + API (Admin, Curator, Member, Viewer).
+- [x] Expand Playwright coverage for full Signal lifecycle and role-sensitive flows.
+- [x] Week 6 exit check: Collaboration Engine phase meets access and workflow goals.
 
 ---
 
@@ -145,7 +145,7 @@ For each Week/Phase (01–12), publish evidence with links:
 
 - [x] Week 02: Core schema constraints enforced (`NOT NULL`, PK/FK, required uniques).
 - [ ] Week 03: Baseline query indexes in place and validated.
-- [ ] Week 06: RBAC policy matrix implemented and admin audit events enabled.
+- [x] Week 06: RBAC policy matrix implemented and admin audit events enabled.
 - [ ] Week 07: Vector/AI data model hardened with retention and refresh rules.
 - [ ] Week 09: Search and leaderboard read paths optimized (indexes/views where needed).
 - [ ] Week 10: Admin analytics data paths documented (materialized views refresh ownership if used).

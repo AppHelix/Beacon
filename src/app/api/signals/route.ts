@@ -26,6 +26,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // RBAC: Only Admin, Curator, and Member can create signals
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole === 'viewer') {
+    return NextResponse.json({ error: 'Forbidden: Viewers cannot create signals' }, { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const { title, description, engagementId, createdBy, status, urgency, requiredSkills, resolutionSummary } = body;

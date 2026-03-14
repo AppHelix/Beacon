@@ -22,6 +22,10 @@ import { SidebarLayout } from "@/components/SidebarLayout";
 export default function Home() {
   const { data: session, status } = useSession();
 
+  // Get user role for RBAC
+  const userRole = session?.user?.role?.toLowerCase();
+  const canAccessAdmin = userRole === 'admin' || userRole === 'curator';
+
   const quickActions = [
     {
       href: "/engagements",
@@ -58,8 +62,17 @@ export default function Home() {
       description: "Manage users, settings, and system governance.",
       cta: "Open Admin Console",
       variant: "ghost" as const,
+      requiresAdmin: true, // RBAC flag
     },
   ];
+
+  // Filter actions based on user role
+  const filteredActions = quickActions.filter(action => {
+    if (action.requiresAdmin) {
+      return canAccessAdmin;
+    }
+    return true;
+  });
 
   if (status === "loading") {
     return (
@@ -156,7 +169,7 @@ export default function Home() {
       <div className="mt-8">
         <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">Quick Actions</h2>
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {quickActions.map(action => (
+          {filteredActions.map(action => (
             <Card
               key={action.href}
               className="group relative overflow-hidden border-slate-200 bg-white shadow-sm transition-all hover:shadow-md"

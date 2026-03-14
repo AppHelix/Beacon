@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Flow', () => {
-  test('should redirect to sign-in when not authenticated', async ({ page }) => {
+  test('should show sign-in button when not authenticated', async ({ page }) => {
     await page.goto('/');
 
-    // Should be redirected to sign-in
-    await page.waitForURL(/.*\/api\/auth\/signin/, { timeout: 5000 });
-    expect(page.url()).toContain('signin');
+    // Home page should show welcome screen with sign-in button
+    await expect(page.locator('h1:has-text("Welcome to Beacon")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('button:has-text("Sign In with Azure AD")')).toBeVisible();
   });
 
   test('sign-out should work after login', async ({ page }) => {

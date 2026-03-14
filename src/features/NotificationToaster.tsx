@@ -6,11 +6,14 @@ import { useNotification } from "./NotificationProvider";
 export default function NotificationToaster() {
   const { notifications, removeNotification } = useNotification();
   return (
-    <div className="fixed top-6 right-6 z-50 flex flex-col gap-3">
+    <div 
+      className="fixed z-50 flex flex-col gap-3 items-end"
+      style={{ top: '1.5rem', right: '1.5rem' }}
+    >
       {notifications.map((n) => (
         <div
           key={n.id}
-          className={`px-6 py-3 rounded-lg shadow-lg font-semibold text-base flex items-center gap-2 transition-all animate-fade-in-down
+          className={`px-6 py-3 rounded-lg shadow-lg font-semibold text-base flex items-center gap-2 transition-all
             ${n.type === "error" ? "bg-red-600 text-white" : n.type === "success" ? "bg-green-600 text-white" : "bg-blue-600 text-white"}`}
           role="alert"
           onClick={() => removeNotification(n.id)}

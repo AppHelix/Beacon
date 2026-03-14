@@ -100,7 +100,7 @@ export default function ProfilePage() {
                 <Shield className="h-4 w-4 text-slate-400" />
                 <div>
                   <p className="text-sm font-medium text-slate-700">Role</p>
-                  <p className="text-slate-900">Member</p>
+                  <p className="text-slate-900">{session.user?.role || "Member"}</p>
                 </div>
               </div>
             </div>
@@ -119,12 +119,18 @@ export default function ProfilePage() {
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
               <p className="text-sm font-medium text-slate-700">Last Sign In</p>
               <p className="mt-1 text-slate-900">
-                {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+                {session.user?.lastSignIn
+                  ? new Date(session.user.lastSignIn).toLocaleString()
+                  : "Not available"}
               </p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
               <p className="text-sm font-medium text-slate-700">Account Created</p>
-              <p className="mt-1 text-slate-900">Welcome to Beacon!</p>
+              <p className="mt-1 text-slate-900">
+                {session.user?.accountCreated
+                  ? new Date(session.user.accountCreated).toLocaleString()
+                  : "Not available"}
+              </p>
             </div>
           </CardContent>
         </Card>

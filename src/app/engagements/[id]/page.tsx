@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -10,13 +10,22 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
+interface TeamMember {
+  id: number;
+  userId: number;
+  userName: string;
+  userEmail: string;
+  role: string;
+  addedAt: string;
+}
+
 interface Engagement {
   id: number;
   name: string;
   clientName: string;
   status: string;
   description?: string;
-  techTags?: string;
+  techTags?: string | string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +41,121 @@ interface Signal {
   requiredSkills?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+function TeamMembers({ engagementId }: { engagementId: number }) {
+  const { data: session } = useSession();
+  const userRole = session?.user?.role?.toLowerCase();
+  const canManageTeam = userRole === "admin" || userRole === "curator";
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [users, setUsers] = useState<{ id: number; name: string; email: string }[]>([]);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [role, setRole] = useState("member");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const fetchMembers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/engagements/${engagementId}/team`);
+      setMembers(await res.json());
+    } catch {
+      setError("Failed to load team members");
+    } finally {
+      setLoading(false);
+    }
+  }, [engagementId]);
+  useEffect(() => { fetchMembers(); }, [fetchMembers]);
+  useEffect(() => {
+    fetch("/api/users").then(r => r.json()).then(setUsers).catch(() => setUsers([]));
+  }, []);
+  const addMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!selectedUser) return setError("Select a user");
+    const userId = Number(selectedUser);
+    try {
+      const res = await fetch(`/api/engagements/${engagementId}/team`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, role })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Failed to add member");
+      } else {
+        setSelectedUser("");
+        setRole("member");
+        fetchMembers();
+      }
+    } catch {
+      setError("Failed to add member");
+    }
+  };
+  const removeMember = async (userId: number) => {
+    setError("");
+    try {
+      const res = await fetch(`/api/engagements/${engagementId}/team`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Failed to remove member");
+      } else {
+        fetchMembers();
+      }
+    } catch {
+      setError("Failed to remove member");
+    }
+  };
+  return (
+    <div>
+      <h3 className="mb-4 text-lg font-semibold text-slate-900">Team Members</h3>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div>
+          {members.length === 0 ? (
+            <p className="text-slate-600">No team members yet.</p>
+          ) : (
+            <ul className="mb-4 divide-y divide-slate-200">
+              {members.map(m => (
+                <li key={m.id} className="flex items-center justify-between py-2">
+                  <div>
+                    <span className="font-medium">{m.userName}</span> <span className="text-slate-500">({m.userEmail})</span> <span className="ml-2 text-xs bg-slate-100 px-2 py-1 rounded">{m.role}</span>
+                  </div>
+                  {canManageTeam && (
+                    <Button size="sm" variant="outline" onClick={() => removeMember(m.userId)}>Remove</Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          {canManageTeam ? (
+            <>
+              <form onSubmit={addMember} className="flex flex-col gap-2 md:flex-row md:items-end md:gap-4">
+                <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} className="rounded border p-2">
+                  <option value="">Select user…</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                  ))}
+                </select>
+                <select value={role} onChange={e => setRole(e.target.value)} className="rounded border p-2">
+                  <option value="member">Member</option>
+                  <option value="lead">Lead</option>
+                </select>
+                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">Add</Button>
+              </form>
+              {error && <div className="text-red-600 mt-2">{error}</div>}
+            </>
+          ) : (
+            <p className="text-sm text-slate-500 mt-4">Only Admins and Curators can manage team members.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 const fetchEngagement = async (id: string): Promise<Engagement | null> => {
@@ -71,6 +195,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
     const tab = (searchParams?.get("tab") ?? "overview").toLowerCase();
     if (tab === "signals") return "signals";
     if (tab === "details") return "details";
+    if (tab === "team") return "team";
     return "overview";
   })();
 
@@ -85,7 +210,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
           setError("Engagement not found");
         } else {
           setEngagement(engagementData);
-          const relatedSignals = signalsData.filter(s => s.engagementId === engagementData.id);
+          const relatedSignals = signalsData.filter((s: Signal) => s.engagementId === engagementData.id);
           setSignals(relatedSignals);
         }
       })
@@ -159,7 +284,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
             techTagsArray = [];
           }
         } catch {
-          techTagsArray = engagement.techTags.split(',').map(t => t.trim()).filter(Boolean);
+          techTagsArray = (engagement.techTags as string).split(',').map((t: string) => t.trim()).filter(Boolean);
         }
       }
     } catch {
@@ -190,8 +315,8 @@ export default function EngagementDetail({ params }: { params: { id: string } })
                     engagement.status === 'Active'
                       ? 'bg-green-100 text-green-700 hover:bg-green-100'
                       : engagement.status === 'Paused'
-                      ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-100'
+                        ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-100'
                   }
                 >
                   {engagement.status}
@@ -224,16 +349,16 @@ export default function EngagementDetail({ params }: { params: { id: string } })
           {[
             { key: "overview", label: "Overview" },
             { key: "signals", label: `Signals (${signals.length})` },
+            { key: "team", label: "Team Members" },
             { key: "details", label: "Details" },
           ].map(tab => (
             <Link
               key={tab.key}
               href={`/engagements/${params.id}?tab=${tab.key}`}
-              className={`min-w-28 flex-1 px-4 py-3 text-center text-sm font-semibold transition ${
-                activeTab === tab.key
+              className={`min-w-28 flex-1 px-4 py-3 text-center text-sm font-semibold transition ${activeTab === tab.key
                   ? "border-b-2 border-indigo-600 bg-indigo-50 text-indigo-600"
                   : "text-slate-600 hover:bg-slate-50"
-              }`}
+                }`}
             >
               {tab.label}
             </Link>
@@ -243,11 +368,11 @@ export default function EngagementDetail({ params }: { params: { id: string } })
         <CardContent className="p-6">
           {activeTab === "overview" && (
             <div>
-              <h3 className="mb-4 text-lg font-semibold text-slate-900">Description</h3>
-              <p className="text-slate-600">
-                {engagement.description || "No description provided"}
-              </p>
+              {/* Overview content here */}
             </div>
+          )}
+          {activeTab === "team" && (
+            <TeamMembers engagementId={engagement.id} />
           )}
 
           {activeTab === "signals" && (
@@ -342,8 +467,8 @@ export default function EngagementDetail({ params }: { params: { id: string } })
                               signal.urgency === 'high'
                                 ? 'bg-red-100 text-red-700 hover:bg-red-100'
                                 : signal.urgency === 'medium'
-                                ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
-                                : 'bg-green-100 text-green-700 hover:bg-green-100'
+                                  ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100'
+                                  : 'bg-green-100 text-green-700 hover:bg-green-100'
                             }
                           >
                             {signal.urgency}
