@@ -7,6 +7,8 @@ declare module "next-auth" {
       name: string;
       email: string;
       role?: string;
+      lastSignIn?: string | null;
+      accountCreated?: string | null;
     };
   }
 
@@ -15,6 +17,18 @@ declare module "next-auth" {
     name: string;
     email: string;
     role?: string;
+  }
+
+  interface Profile {
+    sub?: string;
+    oid?: string;
+    id?: string;
+    name?: string;
+    displayName?: string;
+    given_name?: string;
+    preferred_username?: string;
+    email?: string;
+    mail?: string;
   }
 }
 
