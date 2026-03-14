@@ -50,6 +50,10 @@ export function SidebarLayout({ children, title, description }: SidebarLayoutPro
         .toUpperCase()
     : "U";
 
+  // Check user role for navigation visibility
+  const userRole = (session?.user as any)?.role?.toLowerCase();
+  const canAccessAdmin = userRole === "admin" || userRole === "curator";
+
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Desktop Sidebar */}
@@ -63,6 +67,10 @@ export function SidebarLayout({ children, title, description }: SidebarLayoutPro
         {/* Navigation Links */}
         <nav className="flex-1 space-y-1 px-3 py-4">
           {navigationItems.map((item) => {
+            // Hide Admin link for non-admin/curator users
+            if (item.href === "/admin" && !canAccessAdmin) {
+              return null;
+            }
             const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
             return (
               <Link
@@ -130,6 +138,10 @@ export function SidebarLayout({ children, title, description }: SidebarLayoutPro
                 </div>
                 <nav className="space-y-1 p-3">
                   {navigationItems.map((item) => {
+                    // Hide Admin link for non-admin/curator users
+                    if (item.href === "/admin" && !canAccessAdmin) {
+                      return null;
+                    }
                     const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
                     return (
                       <Link

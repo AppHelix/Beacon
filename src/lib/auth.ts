@@ -1,4 +1,5 @@
 import { type NextAuthOptions } from "next-auth";
+import { eq } from "drizzle-orm";
 import AzureADProvider from "next-auth/providers/azure-ad";
 
 export const authOptions: NextAuthOptions = {
@@ -29,6 +30,19 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   callbacks: {
+        // Update lastSignIn on every login
+        async signIn({ user }: any) {
+          try {
+            const { db } = await import('@/db/client');
+            const { users } = await import('@/db/schema');
+            await db.update(users)
+              .set({ lastSignIn: new Date().toISOString() })
+              .where(eq(users.email, user.email));
+          } catch (err) {
+            console.error('Failed to update last sign in:', err);
+          }
+          return true;
+        },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async jwt({ token, user, profile }: any) {
       // Debug: log the user and profile
@@ -54,6 +68,19 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.name = token.name as string || "User";
         session.user.email = token.email as string || "";
+        // Fetch role from DB
+        try {
+          const { db } = await import('@/db/client');
+          const { users } = await import('@/db/schema');
+          const dbUser = await db.select().from(users).where(eq(users.email, session.user.email));
+          if (dbUser.length > 0) {
+            session.user.role = dbUser[0].role;
+            session.user.lastSignIn = dbUser[0].lastSignIn || null;
+            session.user.accountCreated = dbUser[0].accountCreated || null;
+          }
+        } catch (err) {
+          console.error('Failed to fetch user role from DB:', err);
+        }
       }
       return session;
     },

@@ -16,11 +16,22 @@ export const signalHandRaises = pgTable('signal_hand_raises', {
 
 import { pgTable, serial, text, varchar, integer } from 'drizzle-orm/pg-core';
 
+// Team membership for engagements
+export const engagementTeamMembers = pgTable('engagement_team_members', {
+  id: serial('id').primaryKey(),
+  engagementId: integer('engagement_id').notNull(),
+  userId: integer('user_id').notNull(),
+  role: varchar('role', { length: 50 }).notNull().default('member'), // e.g., member, lead, etc.
+  addedAt: text('added_at').notNull(),
+});
+
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull(),
   role: varchar('role', { length: 50 }).notNull(),
+  lastSignIn: text('last_sign_in'),
+  accountCreated: text('account_created'),
 });
 
 export const engagements = pgTable('engagements', {

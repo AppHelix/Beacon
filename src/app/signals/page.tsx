@@ -66,6 +66,11 @@ function SignalBoardContent() {
   // Suggestion form refs per signal
   const suggestionFormRefs = useRef<Record<number, HTMLFormElement | null>>({});
   const { data: session, status } = useSession();
+  
+  // Get user role for RBAC
+  const userRole = (session?.user as any)?.role?.toLowerCase();
+  const canCreateSignal = userRole === 'admin' || userRole === 'curator' || userRole === 'member';
+  
   const [kanban, setKanban] = useState(false);
   const [sortBy, setSortBy] = useState<'createdAt' | 'urgency' | 'title'>("createdAt");
   const [open, setOpen] = useState(false);
@@ -285,10 +290,11 @@ function SignalBoardContent() {
             </select>
           </label>
           <div className="ml-auto">
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create Signal</Button>
-              </DialogTrigger>
+            {canCreateSignal && (
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create Signal</Button>
+                </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
                   <DialogTitle>Create Signal</DialogTitle>
@@ -367,6 +373,7 @@ function SignalBoardContent() {
                 </form>
               </DialogContent>
             </Dialog>
+            )}
           </div>
         </div>
 

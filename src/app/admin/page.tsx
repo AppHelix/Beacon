@@ -34,6 +34,24 @@ export default function AdminDashboard() {
     );
   }
 
+  // Check if user has admin or curator role
+  const userRole = (session.user as any)?.role?.toLowerCase();
+  const hasAdminAccess = userRole === "admin" || userRole === "curator";
+
+  if (!hasAdminAccess) {
+    return (
+      <SidebarLayout title="Access Denied">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="py-12 text-center">
+            <p className="text-red-600 font-semibold mb-2">Access Denied</p>
+            <p className="text-slate-600">You do not have permission to access the admin dashboard.</p>
+            <p className="text-sm text-slate-500 mt-2">Only users with Admin or Curator roles can access this page.</p>
+          </CardContent>
+        </Card>
+      </SidebarLayout>
+    );
+  }
+
   const adminCards = [
     {
       icon: Users,

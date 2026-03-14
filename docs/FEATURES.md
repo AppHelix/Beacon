@@ -125,12 +125,32 @@ This document summarizes the core product features for the Beacon Engagement Dis
 
 ## 8. Admin & Configuration
 
-- **Role-Based Access Control**
-  - Roles: Admin, Engagement Curator, Member, Viewer.
-  - Admin: full system management, analytics, taxonomy management, spotlight control.
-  - Curator: manage engagement profiles and Signals within their engagements.
-  - Member: full collaboration abilities (Signals, responses, chatbot, profile editing).
-  - Viewer: read-only access for limited-access users (e.g., contractors).
+- **Role-Based Access Control (RBAC)**
+  - **Roles:** Admin, Engagement Curator, Member, Viewer.
+  - **Admin:** Full system management, analytics, taxonomy management, spotlight control, user management, and access to admin dashboard.
+  - **Curator:** Manage engagement profiles, add/remove team members, create and manage Signals within their engagements.
+  - **Member:** Full collaboration abilities (create Signals, respond to hand-raises, add suggestions, use chatbot, edit profile).
+  - **Viewer:** Read-only access for limited-access users (e.g., contractors, stakeholders).
+  
+  - **Implementation:**
+    - Backend API routes enforce role-based permissions (403 Forbidden for unauthorized access).
+    - Session logic fetches user role from database and validates on every request.
+    - UI restrictions: Admin/Curator-only actions are hidden or disabled for Member/Viewer users.
+    - Navigation links (e.g., Admin dashboard) are conditionally rendered based on user role.
+    - Comprehensive Playwright tests validate role-based access and negative authorization scenarios.
+  
+  - **Access Matrix:**
+    | Feature | Admin | Curator | Member | Viewer |
+    |---------|-------|---------|--------|--------|
+    | View Engagements | ✓ | ✓ | ✓ | ✓ |
+    | Edit Engagements | ✓ | ✓ | ✗ | ✗ |
+    | Manage Team Members | ✓ | ✓ | ✗ | ✗ |
+    | Create Signals | ✓ | ✓ | ✓ | ✗ |
+    | Respond to Signals | ✓ | ✓ | ✓ | ✗ |
+    | Access Admin Dashboard | ✓ | ✓ | ✗ | ✗ |
+    | User Management | ✓ | ✗ | ✗ | ✗ |
+    | Analytics Dashboard | ✓ | ✗ | ✗ | ✗ |
+
 - **Taxonomy Management**
   - Admin-managed lists for technology tags, domains, and other controlled vocabularies.
   - Ensures consistent tagging for search, analytics, and AI retrieval.
