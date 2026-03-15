@@ -13,7 +13,7 @@ export default defineConfig({
     video: 'on',
   },
   webServer: {
-    command: 'powershell -c "if (Test-Path .next) { Remove-Item -Recurse -Force .next }; npm run dev"',
+    command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

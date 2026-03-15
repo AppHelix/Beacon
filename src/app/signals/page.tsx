@@ -71,6 +71,9 @@ function SignalBoardContent() {
   const userRole = session?.user?.role?.toLowerCase();
   const canCreateSignal = userRole === 'admin' || userRole === 'curator' || userRole === 'member';
   
+  // Debug: Log role and permission
+  console.log('[Signals] User role:', userRole, 'Can create signal:', canCreateSignal);
+  
   const [kanban, setKanban] = useState(false);
   const [sortBy, setSortBy] = useState<'createdAt' | 'urgency' | 'title'>("createdAt");
   const [open, setOpen] = useState(false);

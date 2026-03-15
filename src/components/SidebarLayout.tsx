@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Home, Briefcase, Radio, Users, ShieldCheck, Menu, Compass, ChevronDown } from "lucide-react";
+import { Home, Briefcase, Radio, Users, ShieldCheck, Menu, Compass, ChevronDown, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ const navigationItems: NavItem[] = [
   { href: "/engagements", label: "Engagements", icon: Briefcase },
   { href: "/signals", label: "Signals", icon: Radio },
   { href: "/people", label: "People", icon: Users },
+  { href: "/beacon", label: "Beacon AI", icon: Bot },
   { href: "/admin", label: "Admin", icon: ShieldCheck },
 ];
 

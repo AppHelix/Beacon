@@ -110,3 +110,23 @@ export const signalEmbeddings = pgTable('signal_embeddings', {
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
+
+// Beacon AI Conversations
+export const conversations = pgTable('conversations', {
+  id: serial('id').primaryKey(),
+  conversationId: varchar('conversation_id', { length: 100 }).notNull().unique(), // External ID for API
+  userId: varchar('user_id', { length: 255 }).notNull(), // Email or user ID
+  title: varchar('title', { length: 255 }), // Auto-generated from first message
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// Beacon AI Conversation Messages
+export const conversationMessages = pgTable('conversation_messages', {
+  id: serial('id').primaryKey(),
+  conversationId: integer('conversation_id').notNull(), // FK to conversations.id
+  role: varchar('role', { length: 20 }).notNull(), // 'user' | 'assistant' | 'system'
+  content: text('content').notNull(), // Message content
+  sources: text('sources'), // JSON array of source citations (for assistant messages)
+  createdAt: text('created_at').notNull(),
+});

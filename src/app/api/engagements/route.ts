@@ -23,6 +23,13 @@ export async function POST(req: Request) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // RBAC: Only Admin and Curator can create engagements
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole !== 'admin' && userRole !== 'curator') {
+    return NextResponse.json({ error: 'Forbidden: Only Admin and Curator can create engagements' }, { status: 403 });
+  }
+
   try {
     const body = await req.json();
     const { name, clientName, status, description, techTags } = body;
