@@ -7,7 +7,7 @@ import { authOptions } from '../../../../lib/auth';
 export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -15,8 +15,9 @@ export async function GET(
   }
 
   try {
+    const { id } = await params;
     const all = await db.select().from(signals);
-    const signal = all.find(s => s.id === parseInt(params.id));
+    const signal = all.find(s => s.id === parseInt(id));
 
     if (!signal) {
       return NextResponse.json({ error: 'Signal not found' }, { status: 404 });
@@ -31,11 +32,17 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params: _params }: { params: { id: string } }
+  { params: _params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // RBAC: Only Admin, Curator, and Member can edit signals
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole === 'viewer') {
+    return NextResponse.json({ error: 'Forbidden: Viewers cannot edit signals' }, { status: 403 });
   }
 
   try {
@@ -72,6 +79,12 @@ export async function DELETE(
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // RBAC: Only Admin, Curator, and Member can delete signals
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole === 'viewer') {
+    return NextResponse.json({ error: 'Forbidden: Viewers cannot delete signals' }, { status: 403 });
   }
 
   try {

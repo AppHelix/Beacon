@@ -6,8 +6,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 // GET: List team members for an engagement
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const engagementId = Number(params.id);
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const engagementId = Number(id);
   if (isNaN(engagementId)) return NextResponse.json({ error: 'Invalid engagement ID' }, { status: 400 });
   const members = await db.select({
     id: engagementTeamMembers.id,
@@ -24,13 +25,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 }
 
 // POST: Add a team member
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   const userRole = session?.user?.role;
   if (!session || !session.user || !userRole || !["admin", "curator"].includes(userRole.toLowerCase())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const engagementId = Number(params.id);
+  const { id } = await params;
+  const engagementId = Number(id);
   if (isNaN(engagementId)) return NextResponse.json({ error: 'Invalid engagement ID' }, { status: 400 });
   const { userId, role } = await req.json();
   if (!userId) return NextResponse.json({ error: 'User ID required' }, { status: 400 });
@@ -43,13 +45,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 }
 
 // DELETE: Remove a team member
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   const userRole = session?.user?.role;
   if (!session || !session.user || !userRole || !["admin", "curator"].includes(userRole.toLowerCase())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const engagementId = Number(params.id);
+  const { id } = await params;
+  const engagementId = Number(id);
   if (isNaN(engagementId)) return NextResponse.json({ error: 'Invalid engagement ID' }, { status: 400 });
   const { userId } = await req.json();
   if (!userId) return NextResponse.json({ error: 'User ID required' }, { status: 400 });

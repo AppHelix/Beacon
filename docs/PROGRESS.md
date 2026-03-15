@@ -64,20 +64,20 @@
 
 ## Phase 07 (Week 7) — AI Data Layer
 
-- [ ] Enable `pgvector` and define embedding storage schema.
-- [ ] Implement embedding generation pipeline for engagements and Signals.
-- [ ] Build retrieval layer for semantic query context.
-- [ ] Validate retrieval quality on seeded project data.
-- [ ] Week 7 exit check: RAG data pipeline is operational.
+- [x] Enable `pgvector` and define embedding storage schema.
+- [x] Implement embedding generation pipeline for engagements and Signals.
+- [x] Build retrieval layer for semantic query context.
+- [x] Validate retrieval quality on seeded project data.
+- [x] Week 7 exit check: RAG data pipeline is operational.
 
 
 ## Phase 08 (Week 8) — Beacon AI Assistant
 
-- [ ] Implement Beacon AI chat backend with RAG grounding.
-- [ ] Add citation mapping to source engagements/Signals.
-- [ ] Implement session history handling for follow-up questions.
-- [ ] Enforce safe fallback behavior (`I don’t know` when context is weak).
-- [ ] Week 8 exit check: chatbot returns grounded answers with citations.
+- [x] Implement Beacon AI chat backend with RAG grounding.
+- [x] Add citation mapping to source engagements/Signals.
+- [x] Implement session history handling for follow-up questions.
+- [x] Enforce safe fallback behavior (`I don't know` when context is weak).
+- [x] Week 8 exit check: chatbot returns grounded answers with citations.
 
 ## Phase 09 (Week 9) — Discovery + Recognition
 

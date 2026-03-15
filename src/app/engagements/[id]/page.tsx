@@ -180,7 +180,8 @@ const fetchSignals = async (): Promise<Signal[]> => {
   }
 };
 
-export default function EngagementDetail({ params }: { params: { id: string } }) {
+export default function EngagementDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const [engagement, setEngagement] = useState<Engagement | null>(null);
@@ -190,6 +191,10 @@ export default function EngagementDetail({ params }: { params: { id: string } })
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // RBAC: Check if user can create signals
+  const userRole = session?.user?.role?.toLowerCase();
+  const canCreateSignal = userRole === 'admin' || userRole === 'curator' || userRole === 'member';
 
   const activeTab = (() => {
     const tab = (searchParams?.get("tab") ?? "overview").toLowerCase();
@@ -202,7 +207,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
   useEffect(() => {
     setIsLoading(true);
     Promise.all([
-      fetchEngagement(params.id),
+      fetchEngagement(id),
       fetchSignals()
     ])
       .then(([engagementData, signalsData]) => {
@@ -219,7 +224,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
         setError("Failed to load engagement details");
       })
       .finally(() => setIsLoading(false));
-  }, [params.id]);
+  }, [id]);
 
   if (status === "loading") {
     return (
@@ -354,7 +359,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
           ].map(tab => (
             <Link
               key={tab.key}
-              href={`/engagements/${params.id}?tab=${tab.key}`}
+              href={`/engagements/${id}?tab=${tab.key}`}
               className={`min-w-28 flex-1 px-4 py-3 text-center text-sm font-semibold transition ${activeTab === tab.key
                   ? "border-b-2 border-indigo-600 bg-indigo-50 text-indigo-600"
                   : "text-slate-600 hover:bg-slate-50"
@@ -377,11 +382,12 @@ export default function EngagementDetail({ params }: { params: { id: string } })
 
           {activeTab === "signals" && (
             <div>
-              <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>
-                  <Button className="mb-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create Signal</Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="max-w-md">
+              {canCreateSignal && (
+                <Sheet open={open} onOpenChange={setOpen}>
+                  <SheetTrigger asChild>
+                    <Button className="mb-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg">Create Signal</Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="max-w-md">
                   <SheetHeader>
                     <SheetTitle>Create Signal</SheetTitle>
                   </SheetHeader>
@@ -448,6 +454,7 @@ export default function EngagementDetail({ params }: { params: { id: string } })
                   </form>
                 </SheetContent>
               </Sheet>
+              )}
               <div>
                 <h3 className="mb-4 text-lg font-semibold text-slate-900">
                   Related Signals ({signals.length})

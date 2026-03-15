@@ -6,13 +6,14 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
 // GET: List all hand-raises for a signal
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const signalId = parseInt(params.id);
+    const { id } = await params;
+    const signalId = parseInt(id);
     const handRaises = await db
       .select()
       .from(signalHandRaises)
@@ -25,14 +26,22 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 }
 
 // POST: Add a hand-raise for a signal
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
       console.error('Hand-raise POST error: No session', { session });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const signalId = parseInt(params.id);
+
+    // RBAC: Only Admin, Curator, and Member can respond to signals
+    const userRole = session.user?.role?.toLowerCase();
+    if (userRole === 'viewer') {
+      return NextResponse.json({ error: 'Forbidden: Viewers cannot respond to signals' }, { status: 403 });
+    }
+
+    const { id } = await params;
+    const signalId = parseInt(id);
     const userEmail = session.user?.email;
     const userName = session.user?.name || 'Anonymous';
     if (!userEmail) {

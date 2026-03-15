@@ -73,6 +73,12 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // RBAC: Only Admin, Curator, and Member can edit signals
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole === 'viewer') {
+    return NextResponse.json({ error: 'Forbidden: Viewers cannot edit signals' }, { status: 403 });
+  }
+
   try {
     const body = await request.json();
     const { id, title, description, status, urgency, requiredSkills, resolutionSummary } = body;
@@ -116,6 +122,12 @@ export async function DELETE(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // RBAC: Only Admin, Curator, and Member can delete signals
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole === 'viewer') {
+    return NextResponse.json({ error: 'Forbidden: Viewers cannot delete signals' }, { status: 403 });
   }
 
   try {

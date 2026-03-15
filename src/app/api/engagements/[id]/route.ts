@@ -7,7 +7,7 @@ import { authOptions } from "../../../../lib/auth";
 export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -15,8 +15,9 @@ export async function GET(
   }
 
   try {
+    const { id } = await params;
     const all = await db.select().from(engagements);
-    const engagement = all.find(e => e.id === parseInt(params.id));
+    const engagement = all.find(e => e.id === parseInt(id));
 
     if (!engagement) {
       return NextResponse.json({ error: "Engagement not found" }, { status: 404 });
@@ -31,11 +32,17 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params: _params }: { params: { id: string } }
+  { params: _params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // RBAC: Only Admin and Curator can edit engagements
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole !== 'admin' && userRole !== 'curator') {
+    return NextResponse.json({ error: 'Forbidden: Only Admin and Curator can edit engagements' }, { status: 403 });
   }
 
   try {
@@ -72,6 +79,12 @@ export async function DELETE(
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // RBAC: Only Admin and Curator can delete engagements
+  const userRole = session.user?.role?.toLowerCase();
+  if (userRole !== 'admin' && userRole !== 'curator') {
+    return NextResponse.json({ error: 'Forbidden: Only Admin and Curator can delete engagements' }, { status: 403 });
   }
 
   try {
