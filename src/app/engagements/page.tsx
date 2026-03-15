@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Engagement {
   id: number;
@@ -56,6 +57,18 @@ function EngagementCatalogContent() {
   const [sort, setSort] = useState(getParam("sort") || "updated-desc");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    clientName: "",
+    status: "Open",
+    description: "",
+    techTags: ""
+  });
+
+  const userRole = session?.user?.role?.toLowerCase();
+  const canCreateEngagement = userRole === 'admin' || userRole === 'curator';
 
   const pageParam = Number(getParam("page") || "1");
   const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
@@ -166,6 +179,137 @@ function EngagementCatalogContent() {
       {error && (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
           {error}
+        </div>
+      )}
+
+      {/* Create Engagement Button */}
+      {canCreateEngagement && (
+        <div className="mb-6 flex justify-end">
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-indigo-600 hover:bg-indigo-700 rounded-lg">
+                + Create Engagement
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create New Engagement</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setSubmitting(true);
+                  setError("");
+                  try {
+                    const res = await fetch("/api/engagements", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(form)
+                    });
+                    if (!res.ok) {
+                      const data = await res.json();
+                      setError(data.error || "Failed to create engagement");
+                    } else {
+                      setOpen(false);
+                      setForm({
+                        name: "",
+                        clientName: "",
+                        status: "Open",
+                        description: "",
+                        techTags: ""
+                      });
+                      // Refresh engagements list
+                      const updated = await fetchEngagements();
+                      setEngagements(updated);
+                    }
+                  } catch {
+                    setError("Failed to create engagement");
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+                className="space-y-4 mt-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium mb-2">Engagement Name *</label>
+                  <Input
+                    required
+                    placeholder="e.g., Customer Portal Modernization"
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Client Name *</label>
+                  <Input
+                    required
+                    placeholder="e.g., Acme Corporation"
+                    value={form.clientName}
+                    onChange={e => setForm(f => ({ ...f, clientName: e.target.value }))}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Status *</label>
+                  <select
+                    required
+                    value={form.status}
+                    onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-300 p-2 text-sm"
+                  >
+                    <option value="Open">Open</option>
+                    <option value="Scoping">Scoping</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Description</label>
+                  <textarea
+                    placeholder="Brief description of the engagement..."
+                    value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-300 p-2 text-sm min-h-[80px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tech Tags</label>
+                  <Input
+                    placeholder="e.g., React,TypeScript,Node.js,PostgreSQL"
+                    value={form.techTags}
+                    onChange={e => setForm(f => ({ ...f, techTags: e.target.value }))}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Comma-separated list</p>
+                </div>
+                {error && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-700 text-sm">
+                    {error}
+                  </div>
+                )}
+                <div className="flex gap-3 justify-end pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="bg-indigo-600 hover:bg-indigo-700 rounded-lg"
+                  >
+                    {submitting ? "Creating..." : "Create Engagement"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
 
