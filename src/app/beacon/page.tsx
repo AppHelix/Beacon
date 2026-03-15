@@ -75,7 +75,7 @@ export default function BeaconPage() {
       setMessages(prev => [...prev, assistantMessage]);
       setConversationId(data.conversationId);
 
-    } catch (error) {
+    } catch (_error) {
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.',
