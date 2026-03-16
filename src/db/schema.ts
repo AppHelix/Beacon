@@ -130,3 +130,30 @@ export const conversationMessages = pgTable('conversation_messages', {
   sources: text('sources'), // JSON array of source citations (for assistant messages)
   createdAt: text('created_at').notNull(),
 });
+
+// ============================================================================
+// PHASE 09: Contribution Event Tracking
+// ============================================================================
+// Track all collaboration actions for recognition and leaderboard features
+
+export const contributions = pgTable('contributions', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id', { length: 255 }).notNull(), // User email or ID
+  userName: varchar('user_name', { length: 255 }).notNull(), // Display name
+  actionType: varchar('action_type', { length: 50 }).notNull(), // 'signal_created', 'hand_raise', 'suggestion', 'signal_resolved', 'team_joined'
+  entityType: varchar('entity_type', { length: 50 }).notNull(), // 'signal', 'engagement', 'user'
+  entityId: integer('entity_id').notNull(), // ID of the related entity
+  entityTitle: varchar('entity_title', { length: 255 }), // Optional title/name of entity for display
+  metadata: text('metadata'), // JSON for additional context (skill tags, resolution notes, etc.)
+  points: integer('points').notNull().default(0), // Points awarded for gamification
+  createdAt: text('created_at').notNull(),
+});
+
+// User badges earned through contributions and milestones
+export const userBadges = pgTable('user_badges', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id', { length: 255 }).notNull(), // User email or ID
+  userName: varchar('user_name', { length: 255 }).notNull(), // Display name
+  badgeId: varchar('badge_id', { length: 50 }).notNull(), // Badge identifier (e.g., 'first_signal', 'contributor_10')
+  awardedAt: text('awarded_at').notNull(), // When the badge was earned
+});

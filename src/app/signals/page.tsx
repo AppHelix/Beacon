@@ -13,6 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import KanbanBoard from "./KanbanBoard";
 import HandRaise from "@/features/HandRaise";
+import { Typeahead } from "@/components/Typeahead";
+import { FacetedFilters, Facet } from "@/components/FacetedFilters";
+import { searchInFields, getTypeaheadSuggestions, expandWithSynonyms, extractFacetOptions, applyFacetFilters } from "@/lib/search-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -114,6 +117,8 @@ function SignalBoardContent() {
   const [statusFilter, setStatusFilter] = useState<string>(getParam("status"));
   const [urgencyFilter, setUrgencyFilter] = useState<string>(getParam("urgency"));
   const [search, setSearch] = useState<string>(getParam("q"));
+  const [facetFilters, setFacetFilters] = useState<Record<string, string[]>>({});
+  const [showFacets, setShowFacets] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const updateQuery = (updates: Record<string, string | undefined>) => {
@@ -159,12 +164,28 @@ function SignalBoardContent() {
     let arr = signals.filter(signal => {
       const matchesStatus = !statusFilter || signal.status === statusFilter;
       const matchesUrgency = !urgencyFilter || normalize(signal.urgency) === normalize(urgencyFilter);
-      const matchesSearch =
-        !search ||
-        signal.title.toLowerCase().includes(search.toLowerCase()) ||
-        signal.description.toLowerCase().includes(search.toLowerCase());
+      // Use synonym-aware search across multiple fields
+      const matchesSearch = !search || searchInFields(
+        [signal.title, signal.description, signal.requiredSkills],
+        search
+      );
       return matchesStatus && matchesUrgency && matchesSearch;
     });
+
+    // Apply facet filters
+    arr = applyFacetFilters(arr, facetFilters, (item, field) => {
+      switch (field) {
+        case 'status':
+          return item.status;
+        case 'urgency':
+          return item.urgency;
+        case 'engagement':
+          return item.engagementId.toString();
+        default:
+          return null;
+      }
+    });
+
     if (sortBy === "createdAt") {
       arr = arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else if (sortBy === "urgency") {
@@ -175,11 +196,43 @@ function SignalBoardContent() {
       );
     } else if (sortBy === "title") {
       arr = arr.sort((a, b) =>
-        a.title.trim().toLocaleLowerCase().localeCompare(b.title.trim().toLocaleLowerCase())
+        a.title.trim().toLocaleLowerCase().localeCompare(b.title.trim().toLocaleLowerCase())  
       );
     }
     return arr;
-  }, [signals, statusFilter, urgencyFilter, search, sortBy]);
+  }, [signals, statusFilter, urgencyFilter, search, sortBy, facetFilters]);
+
+  // Build facets from all signals (before filtering)
+  const facets: Facet[] = useMemo(() => [
+    {
+      id: 'status',
+      label: 'Status',
+      options: extractFacetOptions(signals, (s) => s.status).map(opt => ({
+        ...opt,
+        label: opt.value.charAt(0).toUpperCase() + opt.value.slice(1)
+      })),
+      multiSelect: true,
+    },
+    {
+      id: 'urgency',
+      label: 'Urgency',
+      options: extractFacetOptions(signals, (s) => s.urgency).map(opt => ({
+        ...opt,
+        label: opt.value.charAt(0).toUpperCase() + opt.value.slice(1)
+      })),
+      multiSelect: true,
+    },
+    {
+      id: 'engagement',
+      label: 'Engagement',
+      options: extractFacetOptions(signals, (s) => s.engagementId.toString()).map(opt => ({
+        ...opt,
+        label: `Engagement #${opt.value}`
+      })),
+      multiSelect: true,
+    },
+  ], [signals]);
+
   // Enhanced status change handler to support resolution summary
   const handleStatusChange = async (id: number, newStatus: string, _signal?: Signal) => {
     if (newStatus === "resolved") {
@@ -385,15 +438,39 @@ function SignalBoardContent() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Search</label>
-                <Input
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Search <span className="text-xs font-normal text-slate-500">(with synonyms)</span>
+                </label>
+                <Typeahead
                   value={search}
-                  onChange={e => {
-                    setSearch(e.target.value);
-                    updateQuery({ q: e.target.value || undefined });
+                  onChange={(value) => {
+                    setSearch(value);
+                    updateQuery({ q: value || undefined });
                   }}
-                  placeholder="Search title or description..."
-                  className="border-slate-300 rounded-lg"
+                  getSuggestions={(query) => {
+                    // Generate suggestions from signal titles, descriptions, and skills
+                    const allValues = [
+                      ...signals.map(s => s.title),
+                      ...signals.filter(s => s.requiredSkills).map(s => s.requiredSkills!),
+                    ];
+                    const unique = Array.from(new Set(allValues.filter(Boolean)));
+                    const suggestions = getTypeaheadSuggestions(
+                      unique.map(v => ({ value: v })),
+                      query,
+                      (item) => item.value,
+                      8
+                    );
+                    const expanded = expandWithSynonyms(query);
+                    return suggestions.map(s => ({
+                      value: s.value,
+                      label: s.value,
+                      meta: expanded.length > 1 && expanded.some(t => s.value.toLowerCase().includes(t))
+                        ? 'synonym'
+                        : ''
+                    }));
+                  }}
+                  placeholder="Search title, description, or skills..."
+                  minChars={1}
                 />
               </div>
               <div>
@@ -435,6 +512,39 @@ function SignalBoardContent() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Advanced Filters Toggle */}
+        <div className="mb-6 flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={() => setShowFacets(!showFacets)}
+            className="gap-2"
+          >
+            {showFacets ? '− Hide Advanced Filters' : '+ Show Advanced Filters'}
+          </Button>
+          {Object.values(facetFilters).flat().length > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {Object.values(facetFilters).flat().length} active
+            </Badge>
+          )}
+        </div>
+
+        {/* Faceted Filters */}
+        {showFacets && (
+          <div className="mb-8">
+            <FacetedFilters
+              facets={facets}
+              selectedFilters={facetFilters}
+              onChange={(facetId, values) => {
+                setFacetFilters(prev => ({
+                  ...prev,
+                  [facetId]: values
+                }));
+              }}
+              onClear={() => setFacetFilters({})}
+            />
+          </div>
+        )}
 
         {/* Signals List or Kanban */}
         {kanban ? (

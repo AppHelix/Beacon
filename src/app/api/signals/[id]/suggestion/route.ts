@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/client';
-import { signalSuggestions } from '@/db/schema';
+import { signalSuggestions, signals } from '@/db/schema';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { sql } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
+import { logContribution } from '@/lib/contributions';
 
 // GET: List all suggestions for a signal
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -51,6 +52,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       suggestionText,
       createdAt: now,
     }).returning();
+
+    // Get signal title for contribution log
+    const signal = await db.select().from(signals).where(eq(signals.id, signalId)).limit(1);
+    const signalTitle = signal[0]?.title || `Signal #${signalId}`;
+
+    // Log contribution event
+    await logContribution({
+      userId: userEmail,
+      userName,
+      actionType: 'suggestion',
+      entityType: 'signal',
+      entityId: signalId,
+      entityTitle: signalTitle,
+    });
+
     return NextResponse.json(inserted[0], { status: 201 });
   } catch (err) {
     console.error('Signal suggestion POST error:', err);

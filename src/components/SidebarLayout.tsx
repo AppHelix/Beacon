@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Home, Briefcase, Radio, Users, ShieldCheck, Menu, Compass, ChevronDown, Bot } from "lucide-react";
+import { Home, Briefcase, Radio, Users, ShieldCheck, Menu, ChevronDown, Bot, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ const navigationItems: NavItem[] = [
   { href: "/engagements", label: "Engagements", icon: Briefcase },
   { href: "/signals", label: "Signals", icon: Radio },
   { href: "/people", label: "People", icon: Users },
+  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/beacon", label: "Beacon AI", icon: Bot },
   { href: "/admin", label: "Admin", icon: ShieldCheck },
 ];
@@ -61,7 +62,7 @@ export function SidebarLayout({ children, title, description }: SidebarLayoutPro
       <aside className="hidden w-64 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 lg:flex lg:flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center border-b border-slate-200 dark:border-slate-700 px-6">
-          <Compass className="h-6 w-6 text-indigo-600" />
+          <Radio className="h-6 w-6 text-indigo-600" />
           <span className="ml-3 text-xl font-bold text-slate-900 dark:text-white">Beacon</span>
         </div>
 
@@ -134,7 +135,7 @@ export function SidebarLayout({ children, title, description }: SidebarLayoutPro
               </SheetTrigger>
               <SheetContent side="left" className="w-64 p-0 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
                 <div className="flex h-16 items-center border-b border-slate-200 dark:border-slate-700 px-6">
-                  <Compass className="h-6 w-6 text-indigo-600" />
+                  <Radio className="h-6 w-6 text-indigo-600" />
                   <span className="ml-3 text-xl font-bold text-slate-900 dark:text-white">Beacon</span>
                 </div>
                 <nav className="space-y-1 p-3">
@@ -163,7 +164,7 @@ export function SidebarLayout({ children, title, description }: SidebarLayoutPro
                 </nav>
               </SheetContent>
             </Sheet>
-            <Compass className="h-6 w-6 text-indigo-600" />
+            <Radio className="h-6 w-6 text-indigo-600" />
             <span className="text-lg font-bold text-slate-900 dark:text-white">Beacon</span>
           </div>
           <DropdownMenu>

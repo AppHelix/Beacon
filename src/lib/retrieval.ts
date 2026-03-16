@@ -313,7 +313,7 @@ export async function getRAGContext(
     const related = await findRelatedContent(query, {
       engagementLimit: 3,
       signalLimit: 3,
-      minSimilarity: 0.6, // Higher threshold for RAG
+      minSimilarity: 0.3, // Lowered threshold for better recall
     });
 
     // Prepare context sections

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, Mail, Calendar, Shield } from "lucide-react";
+import { ContributionHistory } from "@/components/ContributionHistory";
+import { BadgeDisplay } from "@/components/BadgeDisplay";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -158,6 +160,14 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Badges and Contribution History */}
+      {session.user?.email && (
+        <div className="mt-6 space-y-6">
+          <BadgeDisplay userId={session.user.email} />
+          <ContributionHistory userId={session.user.email} />
+        </div>
+      )}
     </SidebarLayout>
   );
 }

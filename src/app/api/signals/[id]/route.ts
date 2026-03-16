@@ -3,6 +3,8 @@ import { db } from '../../../../db/client';
 import { signals } from '../../../../db/schema';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../../lib/auth';
+import { eq } from 'drizzle-orm';
+import { logContribution } from '../../../../lib/contributions';
 
 export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,7 +34,7 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params: _params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -46,8 +48,16 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params;
+    const signalId = parseInt(id);
     const body = await request.json();
     const { title, description, status, urgency, requiredSkills } = body;
+
+    // Get current signal to check if status is changing to resolved
+    const [currentSignal] = await db.select().from(signals).where(eq(signals.id, signalId));
+    if (!currentSignal) {
+      return NextResponse.json({ error: 'Signal not found' }, { status: 404 });
+    }
 
     const updated = await db
       .update(signals)
@@ -59,10 +69,26 @@ export async function PATCH(
         ...(requiredSkills !== undefined && { requiredSkills: JSON.stringify(requiredSkills) }),
         updatedAt: new Date().toISOString(),
       })
+      .where(eq(signals.id, signalId))
       .returning();
 
     if (!updated || updated.length === 0) {
       return NextResponse.json({ error: 'Signal not found' }, { status: 404 });
+    }
+
+    // Log contribution if signal was just resolved
+    if (status === 'resolved' && currentSignal.status !== 'resolved') {
+      await logContribution({
+        userId: session.user?.email || 'unknown',
+        userName: session.user?.name || 'Unknown User',
+        actionType: 'signal_resolved',
+        entityType: 'signal',
+        entityId: signalId,
+        entityTitle: updated[0].title,
+        metadata: {
+          previousStatus: currentSignal.status,
+        },
+      });
     }
 
     return NextResponse.json(updated[0]);

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/client';
-import { signalHandRaises } from '@/db/schema';
-import { sql } from 'drizzle-orm';
+import { signalHandRaises, signals } from '@/db/schema';
+import { sql, eq } from 'drizzle-orm';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { logContribution } from '@/lib/contributions';
 
 // GET: List all hand-raises for a signal
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -81,6 +82,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       console.error('Hand-raise POST error: DB insert failed', dbErr);
       return NextResponse.json({ error: 'Database error (insert)' }, { status: 500 });
     }
+
+    // Get signal title for contribution log
+    const signal = await db.select().from(signals).where(eq(signals.id, signalId)).limit(1);
+    const signalTitle = signal[0]?.title || `Signal #${signalId}`;
+
+    // Log contribution event
+    await logContribution({
+      userId: userEmail,
+      userName,
+      actionType: 'hand_raise',
+      entityType: 'signal',
+      entityId: signalId,
+      entityTitle: signalTitle,
+    });
+
     return NextResponse.json(inserted[0], { status: 201 });
   } catch (err) {
     console.error('Hand-raise POST error: Unexpected', err);

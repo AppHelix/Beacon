@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Typeahead } from "@/components/Typeahead";
+import { FacetedFilters, Facet } from "@/components/FacetedFilters";
+import { searchInFields, getTypeaheadSuggestions, expandWithSynonyms, extractFacetOptions, applyFacetFilters } from "@/lib/search-utils";
 
 interface Engagement {
   id: number;
@@ -55,6 +58,8 @@ function EngagementCatalogContent() {
   const [filter, setFilter] = useState(getParam("q"));
   const [statusFilter, setStatusFilter] = useState(getParam("status"));
   const [sort, setSort] = useState(getParam("sort") || "updated-desc");
+  const [facetFilters, setFacetFilters] = useState<Record<string, string[]>>({});
+  const [showFacets, setShowFacets] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
@@ -105,13 +110,35 @@ function EngagementCatalogContent() {
   }, [searchParams]);
 
   const filteredEngagements = useMemo(() => {
-    const filtered = engagements.filter(e => {
-      const matchesSearch =
-        !filter ||
-        e.name.toLowerCase().includes(filter.toLowerCase()) ||
-        e.clientName.toLowerCase().includes(filter.toLowerCase());
+    let filtered = engagements.filter(e => {
+      // Use synonym-aware search across multiple fields
+      const matchesSearch = !filter || searchInFields(
+        [
+          e.name,
+          e.clientName,
+          e.description,
+          e.techTags
+        ],
+        filter
+      );
       const matchesStatus = !statusFilter || e.status === statusFilter;
       return matchesSearch && matchesStatus;
+    });
+
+    // Apply facet filters
+    filtered = applyFacetFilters(filtered, facetFilters, (item, field) => {
+      switch (field) {
+        case 'status':
+          return item.status;
+        case 'client':
+          return item.clientName;
+        case 'tech':
+          if (!item.techTags) return [];
+          // techTags is stored as comma-separated string
+          return item.techTags.split(',').map(tag => tag.trim()).filter(Boolean);
+        default:
+          return null;
+      }
     });
 
     const sorted = [...filtered].sort((a, b) => {
@@ -129,7 +156,42 @@ function EngagementCatalogContent() {
     });
 
     return sorted;
-  }, [engagements, filter, sort, statusFilter]);
+  }, [engagements, filter, sort, statusFilter, facetFilters]);
+
+  // Build facets from all engagements (before filtering)
+  const facets: Facet[] = useMemo(() => [
+    {
+      id: 'status',
+      label: 'Status',
+      options: extractFacetOptions(engagements, (e) => e.status).map(opt => ({
+        ...opt,
+        label: opt.value.charAt(0).toUpperCase() + opt.value.slice(1)
+      })),
+      multiSelect: true,
+    },
+    {
+      id: 'client',
+      label: 'Client',
+      options: extractFacetOptions(engagements, (e) => e.clientName).map(opt => ({
+        ...opt,
+        label: opt.value
+      })),
+      multiSelect: true,
+    },
+    {
+      id: 'tech',
+      label: 'Technology',
+      options: extractFacetOptions(engagements, (e) => {
+        if (!e.techTags) return [];
+        // techTags is stored as comma-separated string, not JSON
+        return e.techTags.split(',').map(tag => tag.trim()).filter(Boolean);
+      }).map(opt => ({
+        ...opt,
+        label: opt.value.charAt(0).toUpperCase() + opt.value.slice(1)
+      })),
+      multiSelect: true,
+    },
+  ], [engagements]);
 
   const totalPages = Math.max(1, Math.ceil(filteredEngagements.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
@@ -318,16 +380,45 @@ function EngagementCatalogContent() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             <div>
-              <label className="mb-3 block text-base font-semibold text-slate-700 dark:text-slate-300">Search</label>
-              <Input
-                type="text"
-                placeholder="Filter by name or client..."
+              <label className="mb-3 block text-base font-semibold text-slate-700 dark:text-slate-300">
+                Search <span className="text-xs font-normal text-slate-500">(with synonyms)</span>
+              </label>
+              <Typeahead
                 value={filter}
-                onChange={e => {
-                  setFilter(e.target.value);
-                  updateQuery({ q: e.target.value || undefined, page: "1" });
+                onChange={(value) => {
+                  setFilter(value);
+                  updateQuery({ q: value || undefined, page: "1" });
                 }}
-                className="w-full rounded-lg border border-slate-300 p-3 text-base h-11 bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+                getSuggestions={(query) => {
+                  // Generate suggestions from engagement names, clients, and tech tags
+                  const allValues = [
+                    ...engagements.map(e => e.name),
+                    ...engagements.map(e => e.clientName),
+                    ...engagements.flatMap(e => {
+                      if (!e.techTags) return [];
+                      // techTags is stored as comma-separated string
+                      return e.techTags.split(',').map(tag => tag.trim()).filter(Boolean);
+                    })
+                  ];
+                  const unique = Array.from(new Set(allValues));
+                  const suggestions = getTypeaheadSuggestions(
+                    unique.map(v => ({ value: v })),
+                    query,
+                    (item) => item.value,
+                    8
+                  );
+                  const expanded = expandWithSynonyms(query);
+                  return suggestions.map(s => ({
+                    value: s.value,
+                    label: s.value,
+                    meta: expanded.length > 1 && expanded.some(t => s.value.toLowerCase().includes(t)) 
+                      ? 'synonym' 
+                      : ''
+                  }));
+                }}
+                placeholder="Search name, client, or technology..."
+                minChars={1}
+                className="w-full"
               />
             </div>
             <div>
@@ -367,6 +458,39 @@ function EngagementCatalogContent() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Advanced Filters Toggle */}
+      <div className="mb-6 flex items-center justify-between">
+        <Button
+          variant="outline"
+          onClick={() => setShowFacets(!showFacets)}
+          className="gap-2"
+        >
+          {showFacets ? '− Hide Advanced Filters' : '+ Show Advanced Filters'}
+        </Button>
+        {Object.values(facetFilters).flat().length > 0 && (
+          <Badge variant="secondary" className="ml-2">
+            {Object.values(facetFilters).flat().length} active
+          </Badge>
+        )}
+      </div>
+
+      {/* Faceted Filters */}
+      {showFacets && (
+        <div className="mb-8">
+          <FacetedFilters
+            facets={facets}
+            selectedFilters={facetFilters}
+            onChange={(facetId, values) => {
+              setFacetFilters(prev => ({
+                ...prev,
+                [facetId]: values
+              }));
+            }}
+            onClear={() => setFacetFilters({})}
+          />
+        </div>
+      )}
 
       {isLoading && <p className="text-lg text-slate-600 dark:text-slate-400 py-8 text-center">Loading engagement data...</p>}
 

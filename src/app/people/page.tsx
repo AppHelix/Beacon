@@ -201,9 +201,13 @@ function ClientPeopleDirectory() {
                   asChild
                   className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-700"
                 >
-                  <Link href={`/people?q=${encodeURIComponent(user.name)}`}>
-                    View Profile
-                  </Link>
+                  {session?.user?.email === user.email ? (
+                    <Link href="/profile">View Profile</Link>
+                  ) : (
+                    <Link href={`/people?q=${encodeURIComponent(user.name)}`}>
+                      View Profile
+                    </Link>
+                  )}
                 </Button>
               </CardContent>
             </Card>

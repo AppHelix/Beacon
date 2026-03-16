@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SidebarLayout } from "@/components/SidebarLayout";
+import { FeaturedProjectSpotlight } from "@/components/FeaturedProjectSpotlight";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -197,6 +198,11 @@ export default function Home() {
             </Card>
           ))}
         </div>
+      </div>
+
+      {/* Featured Projects */}
+      <div className="mt-8">
+        <FeaturedProjectSpotlight />
       </div>
 
       {/* Help Section */}

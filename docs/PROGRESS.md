@@ -81,10 +81,10 @@
 
 ## Phase 09 (Week 9) — Discovery + Recognition
 
-- [ ] Implement advanced search (facets, synonym support, typeahead).
-- [ ] Build contribution event tracking across collaboration actions.
-- [ ] Add leaderboard views (monthly/quarterly breakdowns).
-- [ ] Add badge milestones and Featured Project Spotlight.
+- [x] Implement advanced search (facets, synonym support, typeahead).
+- [x] Build contribution event tracking across collaboration actions.
+- [x] Add leaderboard views (monthly/quarterly breakdowns).
+- [x] Add badge milestones and Featured Project Spotlight.
 - [ ] Add chatbot + contribution E2E coverage.
 - [ ] Week 9 exit check: Intelligence/Recognition phase is release-ready.
 
